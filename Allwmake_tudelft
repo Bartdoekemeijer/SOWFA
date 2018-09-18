@@ -1,8 +1,8 @@
 #!/bin/bash
 echo " "
 
-export COMPILEZEROMQ = 1; # Install zeroMQ
-export INSTALL_SOWFA = 1; # Install SOWFA
+export COMPILEZEROMQ=1; # Install zeroMQ
+export INSTALL_SOWFA=1; # Install SOWFA
 
 
 # Set up environment
@@ -16,19 +16,6 @@ export OPENFOAM_NAME=OPENFOAM-$OPENFOAM_VERSION
 
 module list
 echo " "
-
-
-# Check if folders are already existent
-if [ -d $WM_PROJECT_USER_DIR ] || [ -d $HOME/OpenFOAM/zeroMQ ]
-then
-	echo "ERROR: one or more of the directories:"
-	echo "  $HOME/OpenFOAM/SOWFA,"
-	echo "  $HOME/OpenFOAM/zeroMQ,"
-	echo "  $WM_PROJECT_USER_DIR,"	
-	echo "already exist. Please remove or rename these directories before attempting to install SOWFA/OpenFAST."
-	exit 1
-fi
-
 
 # Install zeroMQ (if SSC with zeroMQ enabled)
 if [ $COMPILEZEROMQ -eq 1 ] # Bart SSC branch with zeroMQ
@@ -84,7 +71,8 @@ then
     fi
 
 	echo "Making a new working directory in $WM_PROJECT_USER_DIR."
-	cp -rs * $WM_PROJECT_USER_DIR/.
+    mkdir $WM_PROJECT_USER_DIR
+	ln $PWD/* $WM_PROJECT_USER_DIR/.
 
 	echo "The SOWFA installation should take a few minutes minutes..."
 	cd $WM_PROJECT_USER_DIR
