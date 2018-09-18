@@ -84,8 +84,6 @@ else
 fi
 echo " "
 echo "You can find your installed SOWFA directory in $WM_PROJECT_USER_DIR"
-echo "You can now delete directory $SOWFASOURCEDIR..."
-rm -r $SOWFASOURCEDIR
 
 # Note: remember to export ZeroMQ for closed-loop runs with SOWFA using:
 #	export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
