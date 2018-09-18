@@ -72,7 +72,7 @@ then
 
 	echo "Making a new working directory in $WM_PROJECT_USER_DIR."
     mkdir $WM_PROJECT_USER_DIR
-	ln $PWD/* $WM_PROJECT_USER_DIR/.
+	cp -rs $PWD/* $WM_PROJECT_USER_DIR/.
 
 	echo "The SOWFA installation should take a few minutes minutes..."
 	cd $WM_PROJECT_USER_DIR
