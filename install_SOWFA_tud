@@ -47,7 +47,8 @@ then
 	git clone https://github.com/zeromq/libzmq $HOME/OpenFOAM/zeroMQ/libzmq
 	mkdir $HOME/OpenFOAM/zeroMQ/libzmq/cmake-build && cd $HOME/OpenFOAM/zeroMQ/libzmq/cmake-build
 	cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install .. && make -j 8
-	make test && make install
+	# make test && 
+    make install
 	
 	# And finally we define the appropriate PATHs for the SOWFA installation
 	export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
@@ -71,10 +72,9 @@ then
         exit 1
     fi
 
-	echo "Making a new working directory in $WM_PROJECT_USER_DIR."
-    mkdir $WM_PROJECT_USER_DIR
-	cp -rs $SOWFASOURCEDIR/* $WM_PROJECT_USER_DIR/.
-
+	echo "Moving this SOWFA folder to $WM_PROJECT_USER_DIR."
+	mv $SOWFASOURCEDIR $WM_PROJECT_USER_DIR # Move files
+    
 	echo "The SOWFA installation should take a few minutes minutes..."
 	cd $WM_PROJECT_USER_DIR
 	./Allwclean && ./Allwmake
@@ -83,7 +83,9 @@ else
 	echo "SOWFA is not being compiled: INSTALL_SOWFA = $INSTALL_SOWFA."
 fi
 echo " "
-
+echo "You can find your installed SOWFA directory in $WM_PROJECT_USER_DIR"
+echo "You can now delete directory $SOWFASOURCEDIR..."
+rm -r $SOWFASOURCEDIR
 
 # Note: remember to export ZeroMQ for closed-loop runs with SOWFA using:
 #	export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
