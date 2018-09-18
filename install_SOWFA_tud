@@ -1,0 +1,94 @@
+#!/bin/bash
+echo " "
+
+export COMPILEZEROMQ=1; # Install zeroMQ
+export INSTALL_SOWFA=1; # Install SOWFA
+
+
+# Set up environment
+echo " ---------------- 1. INITIALIZATION ------------------------- "
+echo "Setting the right modules and environmental variables."
+module purge
+module load torque/4.2.10 # HPC communication protocol
+module load openfoam/2.4.0 # OpenFOAM 2.4.0
+export OPENFOAM_VERSION=2.4.0
+export OPENFOAM_NAME=OPENFOAM-$OPENFOAM_VERSION
+export SOWFASOURCEDIR=$PWD
+
+module list
+echo " "
+
+# Install zeroMQ (if SSC with zeroMQ enabled)
+if [ $COMPILEZEROMQ -eq 1 ] # Bart SSC branch with zeroMQ
+then
+	echo " ---------------- 2. ZEROMQ INSTALLATION -------------------- "
+		
+    # Check if folder is already existent
+    if [ -d $HOME/OpenFOAM/zeroMQ ]
+    then
+        echo "ERROR: one or more of the directories:"
+        echo "ERROR: directory $HOME/OpenFOAM/zeroMQ already exists. Failed to (re)install ZeroMQ."
+        exit 1
+    fi
+        
+	# First we need to update CMake
+	echo "Installing CMake 3.11 to $HOME/OpenFOAM/zeroMQ/cmake-3.11.2."
+	mkdir -p $HOME/OpenFOAM/zeroMQ
+	cd $HOME/OpenFOAM/zeroMQ
+	wget https://cmake.org/files/v3.11/cmake-3.11.2.tar.gz 
+	tar xf cmake-3.11.2.tar.gz && cd cmake-3.11.2
+	./bootstrap --prefix=$HOME/OpenFOAM/zeroMQ/cmake-3.11.2/install
+	make -j 8 && make install
+	export PATH=$HOME/OpenFOAM/zeroMQ/cmake-3.11.2/install/bin:$PATH
+	echo " "
+	
+	# Now we install the ZeroMQ library
+	echo "Installing ZeroMQ library to $HOME/OpenFOAM/zeroMQ/libzmq"
+	git clone https://github.com/zeromq/libzmq $HOME/OpenFOAM/zeroMQ/libzmq
+	mkdir $HOME/OpenFOAM/zeroMQ/libzmq/cmake-build && cd $HOME/OpenFOAM/zeroMQ/libzmq/cmake-build
+	cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install .. && make -j 8
+	make test && make install
+	
+	# And finally we define the appropriate PATHs for the SOWFA installation
+	export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
+	export ZEROMQ_LIB=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64
+	
+	export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64:$LD_LIBRARY_PATH
+	echo " "
+fi
+
+
+# Install SOWFA
+echo " ---------------- 3. SOWFA INSTALLATION -------------------- "
+if [ $INSTALL_SOWFA -eq 1 ]
+then
+
+    # Check if folder is already existent
+    if [ -d $WM_PROJECT_USER_DIR ]
+    then
+        echo "ERROR: directory $WM_PROJECT_USER_DIR already exists. Failed to (re)install SOWFA."	
+        exit 1
+    fi
+
+	echo "Making a new working directory in $WM_PROJECT_USER_DIR."
+    mkdir $WM_PROJECT_USER_DIR
+	cp -rs $SOWFASOURCEDIR/* $WM_PROJECT_USER_DIR/.
+
+	echo "The SOWFA installation should take a few minutes minutes..."
+	cd $WM_PROJECT_USER_DIR
+	./Allwclean && ./Allwmake
+	printf "\n\n\n" && echo "Performing second Allwmake run to check for errors..." && ./Allwmake # Repeat to check for errors
+else
+	echo "SOWFA is not being compiled: INSTALL_SOWFA = $INSTALL_SOWFA."
+fi
+echo " "
+
+
+# Note: remember to export ZeroMQ for closed-loop runs with SOWFA using:
+#	export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
+#	export ZEROMQ_LIB=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64
+#	
+#	export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib:$LD_LIBRARY_PATH
+#	export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64:$LD_LIBRARY_PATH
+
