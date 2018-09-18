@@ -1,0 +1,2 @@
+Time(s)	Turbine	Yaw(degCompass)	Pitch(deg)
+20000	0	<yaw_angle>	<pitch_angle>
