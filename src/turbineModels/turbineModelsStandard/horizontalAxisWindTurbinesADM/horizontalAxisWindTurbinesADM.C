@@ -38,8 +38,7 @@ License
 #include "interpolateXY.H"
 
 // SSC inclusions without dependencies
-#include "controllers/superControllers/SCSimple.C"     //_SSC_ inclusion
-#include "controllers/superControllers/timeTableSSC.C" //_SSC_ inclusion
+#include "controllers/superControllers/timeTableSSC_ADM.C" //_SSC_ inclusion
 
 // SSC inclusions with dependencies
 #define DO_EXPAND(VAL)  VAL ## 1
@@ -50,7 +49,7 @@ License
 #endif
 
 #if COMPILEZEROMQ == 1 // External definition for gcc compiler: '-D COMPILEZEROMQ=1'
-    #include "controllers/superControllers/zeromqSSC.C" //_SSC_ inclusion
+    #include "controllers/superControllers/zeromqSSC_ADM.C" //_SSC_ inclusion
 #endif
 
 namespace Foam
@@ -172,6 +171,7 @@ horizontalAxisWindTurbinesADM::horizontalAxisWindTurbinesADM
         nInputsToSSC = int(readScalar(turbineArrayProperties.subDict("sscProperties").lookup("nInputsToSSC"))); 
         nOutputsFromSSC = int(readScalar(turbineArrayProperties.subDict("sscProperties").lookup("nOutputsFromSSC")));
         sscControllerType = word(turbineArrayProperties.subDict("sscProperties").lookup("sscControllerType"));
+        sscMeasurementsFunction = word(turbineArrayProperties.subDict("sscProperties").lookup("sscMeasurementsFunction"));
         
         if (sscControllerType == "zeromqSSC") { 
             zmqAddress = string(turbineArrayProperties.subDict("sscProperties").lookup("zmqAddress"));
@@ -997,6 +997,11 @@ void horizontalAxisWindTurbinesADM::controlGenTorque()
         {
             #include "controllers/genTorqueControllers/speedTorqueTable.H"
         }
+        else if (GenTorqueControllerType[j] == "torqueSC")
+        {
+            #include "controllers/genTorqueControllers/torqueSC.H"
+        }
+      
 
         // Limit the change in generator torque.
         if (GenTorqueRateLimiter[j])
@@ -1080,6 +1085,7 @@ void horizontalAxisWindTurbinesADM::superController()
     // if this is the master, call 
     if (Pstream::master())
     {
+        sscMeasurements(); // Gather measurements
         callSuperController();  // Call the superController function
 
         // Send result local
@@ -1102,25 +1108,30 @@ void horizontalAxisWindTurbinesADM::superController()
 
 }
 
+//_SSC_: define  the call to the SSC measurement function
+void horizontalAxisWindTurbinesADM::sscMeasurements()
+{
+        // _SSC_, specific measurement definition        
+        if (sscMeasurementsFunction == "default")
+        {
+            #include "controllers/measurementFunctions/default.H"
+        }       
+}
+
 //_SSC_: define  the call to the simple controller
 //  The super controller code facilitates the exchangess 
 void horizontalAxisWindTurbinesADM::callSuperController()
 {
-        // _SSC_, specific controller
-        if (sscControllerType == "simpleSSC")
-        {
-            #include "controllers/superControllers/SCSimple.H"
-        }
-        
+        // _SSC_, specific controller        
         if (sscControllerType == "timeTableSSC")
         {
-            #include "controllers/superControllers/timeTableSSC.H"
+            #include "controllers/superControllers/timeTableSSC_ADM.H"
         }       
 
         #if COMPILEZEROMQ == 1
             if (sscControllerType == "zeromqSSC")
             {
-                #include "controllers/superControllers/zeromqSSC.H"
+                #include "controllers/superControllers/zeromqSSC_ADM.H"
             }   
         #else
             if (sscControllerType == "zeromqSSC")
