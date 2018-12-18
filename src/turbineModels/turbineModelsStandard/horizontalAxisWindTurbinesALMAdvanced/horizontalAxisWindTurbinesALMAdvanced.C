@@ -1670,7 +1670,6 @@ void horizontalAxisWindTurbinesALMAdvanced::controlNacYaw()
 
         // Initialize the commanded nacelle yaw variable;
         scalar nacYawCommanded = nacYaw[i];
-
         
         // Apply a controller to update the nacelle yaw position.
         if (NacYawControllerType[j] == "none")
@@ -1694,16 +1693,20 @@ void horizontalAxisWindTurbinesALMAdvanced::controlNacYaw()
         {
             #include "controllers/nacYawControllers/yawSC.H"
         }
-
+        
       //Info << "nacYaw = " << nacYaw << endl;
-        if (((nacYawCommanded - nacYaw[i]) / degRad) <= 180.0)
+        if (((nacYawCommanded - nacYaw[i]) / degRad) <= -180.0)
+        {
+            deltaNacYaw[i] = (360.0*degRad) + nacYawCommanded - nacYaw[i];
+        }
+        else if (((nacYawCommanded - nacYaw[i]) / degRad) <= 180.0)
         {
             deltaNacYaw[i] = nacYawCommanded - nacYaw[i];
         }
         else
         {
             deltaNacYaw[i] = nacYaw[i] - ((360.0*degRad) - nacYawCommanded);
-        }
+        }       
       //Info << "deltaNacYaw = " << deltaNacYaw / degRad << endl;
    
          // Limit the change in nacelle yaw angle.
@@ -1711,7 +1714,6 @@ void horizontalAxisWindTurbinesALMAdvanced::controlNacYaw()
         {
             #include "limiters/nacYawRateLimiter.H"
         }
-
       //Info << "deltaNacYaw = " << deltaNacYaw / degRad << endl;
     }
 }
