@@ -1,4 +1,4 @@
-#!/nopt/nrel/apps/python/2.7.6-gcc-4.8.2/bin/python
+#!/usr/bin/python
 
 # This script reads in the points and faces files created by OpenFOAM's sample 
 # patch function object and creates a points file needed by the 

@@ -1,4 +1,4 @@
-#!/nopt/nrel/apps/python/2.7.6-gcc-4.8.2/bin/python
+#!/usr/bin/python
 
 # This script reads in the data files created by OpenFOAM's sample patch
 # function object and creates an updated file that works with the
