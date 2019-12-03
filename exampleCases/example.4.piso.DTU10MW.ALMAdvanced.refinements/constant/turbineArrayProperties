@@ -1,0 +1,97 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.0                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbineArrayProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+ 
+globalProperties
+{
+    outputControl       "timeStep";
+    outputInterval       1;
+}
+ 
+turbine0
+{
+    turbineType                      "DTU10MWRef";
+    includeNacelle                    true;
+    includeTower                      true;
+    baseLocation                     (500.0 500.0 0.0);
+    numBladePoints                    40;
+    numNacellePoints                  10;
+    numTowerPoints                    40;
+    bladePointDistType               "uniform";
+    nacellePointDistType             "uniform";
+    towerPointDistType               "uniform";
+    bladeSearchCellMethod            "disk";
+    bladeActuatorPointInterpType     "integral";
+    nacelleActuatorPointInterpType   "linear";
+    towerActuatorPointInterpType     "linear";
+    actuatorUpdateType               "oldPosition";
+    bladeForceProjectionType         "uniformGaussian";
+    nacelleForceProjectionType       "diskGaussian";
+    towerForceProjectionType         "advanced";
+    bladeForceProjectionDirection    "localVelocityAligned";
+    bladeEpsilon                     (5.0 0.0 0.0);
+    nacelleEpsilon                   (5.0 5.0 0.0);
+    towerEpsilon                     (5.0 5.0 0.0);
+    nacelleSampleDistance             1.0;
+    towerSampleDistance               3.5;
+    tipRootLossCorrType              "none";
+    forceScalar                      1.15;
+    rotationDir                      "cw";
+    Azimuth                           0.0;
+    RotSpeed                          7.5;
+    TorqueGen                         0.0;
+    Pitch                             0.0;
+    NacYaw                          270.0;
+    fluidDensity                      1.23;
+    velocityDragCorrType              "none";
+}
+
+turbine1
+{
+    turbineType                      "DTU10MWRef";
+    includeNacelle                    true;
+    includeTower                      true;
+    baseLocation                     (1000.0 500.0 0.0);
+    numBladePoints                    40;
+    numNacellePoints                  10;
+    numTowerPoints                    40;
+    bladePointDistType               "uniform";
+    nacellePointDistType             "uniform";
+    towerPointDistType               "uniform";
+    bladeSearchCellMethod            "disk";
+    bladeActuatorPointInterpType     "integral";
+    nacelleActuatorPointInterpType   "linear";
+    towerActuatorPointInterpType     "linear";
+    actuatorUpdateType               "oldPosition";
+    bladeForceProjectionType         "uniformGaussian";
+    nacelleForceProjectionType       "diskGaussian";
+    towerForceProjectionType         "advanced";
+    bladeForceProjectionDirection    "localVelocityAligned";
+    bladeEpsilon                     (5.0 0.0 0.0);
+    nacelleEpsilon                   (5.0 5.0 0.0);
+    towerEpsilon                     (5.0 5.0 0.0);
+    nacelleSampleDistance             1.0;
+    towerSampleDistance               3.5;
+    tipRootLossCorrType              "none";
+    forceScalar                      1.15;
+    rotationDir                      "cw";
+    Azimuth                           0.0;
+    RotSpeed                          7.5;
+    TorqueGen                         0.0;
+    Pitch                             0.0;
+    NacYaw                          270.0;
+    fluidDensity                      1.23;
+    velocityDragCorrType              "none";
+}

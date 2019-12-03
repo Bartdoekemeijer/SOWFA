@@ -1,0 +1,65 @@
+#!/bin/bash
+#PBS -N piso.preprocess
+#PBS -l nodes=1:ppn=1
+
+# User input
+startTime=0                     # Start time
+refineMeshLocal=0               # Number of levels of local refinement (requires 
+                                # system/topoSetDict and system/refineHexMeshDict).
+
+
+
+# Define a function for mesh refinement: Local refinement performed on one core.
+refineMeshLocal()
+{
+   i=$1
+   while [ $i -ge 1 ]
+   do
+      echo "   -Performing level $i local refinement with topoSet/refineHexMesh"
+      echo "      *selecting cells to refine..."
+      topoSet -dict system/topoSetDict.local.$i > log.topoSet.local.$i 2>&1
+
+      echo "      *refining cells..."
+      refineHexMesh local -overwrite > log.refineHexMesh.local.$i 2>&1
+
+      let i=i-1
+   done
+}
+
+# Load the OpenFOAM module on the cluster
+echo "Loading the OpenFOAM module..."
+module load openfoam/2.4.0
+
+# Copy the controlDict.1 (assuming this is the one the actual solver will start
+# out with) to controlDict.  OpenFOAM reads "controlDict", not the numbered ones.
+echo "Getting the control dictionary ready..."
+cp system/controlDict.1 system/controlDict
+
+# Copy the "clean" .original initial fields to a working copy.  OpenFOAM does not
+# read the ".original" initial fields--that's why they remain clean.
+echo "Getting the initial condition directory ready..."
+rm -rf $startTime
+cp -rf $startTime.original $startTime
+
+# Build the mesh.
+echo "Using blockMesh to create the base mesh..."
+cp constant/polyMesh/blockMeshDict ./
+rm -rf constant/polyMesh/*
+mv ./blockMeshDict constant/polyMesh
+blockMesh > log.blockMesh 2>&1
+
+# Do serial local refinement
+echo "Using refineHexMesh to perform " $refineMeshLocal " of local refinement..."
+refineMeshLocal $refineMeshLocal
+
+# Renumber the mesh.
+echo "Using renumberMesh to renumber the mesh for better matrix conditioning..."
+renumberMesh -overwrite > log.renumberMesh 2>&1
+
+# Decompose the mesh and solution files (serial)
+echo "Using decomposePar to decompose the problem for parallel processing..."
+decomposePar -cellDist -force > log.decomposePar 2>&1
+
+# Check the mesh.
+echo "Running checkMesh to report mesh diagnostics..."
+checkMesh > log.checkMesh.1 2>&1
