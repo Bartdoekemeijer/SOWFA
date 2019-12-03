@@ -1,7 +1,6 @@
 *.asv
 **/*.dep
 
-archivedCases
 platforms
 src/fileFormats/lnInclude
 src/finiteVolume/lnInclude
