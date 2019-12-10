@@ -1,0 +1,34 @@
+#!/bin/bash
+#PBS -N prec.3kmx3kmx1km.9ms.1
+#PBS -l nodes=2:ppn=40 				# Request one node with 4 free processor cores 
+#PBS -m ae 							# Mail me when the job ends for any reason 
+#PBS -M myemailaddress@tudelft.nl 	# Email address
+
+# Load OpenFOAM
+module load openfoam/2.4.0
+
+
+
+# Change to the directory that the job was submitted from
+cd $PBS_O_WORKDIR
+
+cores=80
+initializer=setFieldsABL
+solver=ABLSolver
+runNumber=1
+
+cp system/controlDict.$runNumber system/controlDict
+
+echo "Starting OpenFOAM job at: " $(date)
+echo "using " $cores " cores"
+
+# Run the flow field initializer (parallel)
+if [ $runNumber -eq 1 ] 
+   then
+   mpirun -np $cores $initializer -parallel > log.$runNumber.$initializer 2>&1
+fi
+
+# Run the solver (parallel)
+mpirun -np $cores $solver -parallel > log.$runNumber.$solver 2>&1
+
+echo "Ending OpenFOAM job at: " $(date)

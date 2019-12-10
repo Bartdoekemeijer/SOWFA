@@ -1,0 +1,66 @@
+      sliceDataInstantaneous
+      {
+          type                 surfaces;
+          functionObjectLibs   ("libsampling.so");
+          enabled              true;
+          interpolationScheme  cell;
+          outputControl        adjustableTime;
+          writeInterval        5;
+          surfaceFormat        vtk;
+          fields
+          (
+              U
+          );
+          surfaces
+          (
+              slice_horizontal
+              {
+                  type         plane;
+                  basePoint    (1000.01 500.01 119.01);
+                  normalVector (0 0 1);
+                  triangulate  false;
+              }
+              slice_vertical_x500
+              {
+                  type         plane;
+                  basePoint    (500.01 500.01 119.01);
+                  normalVector (1 0 0);
+                  triangulate  false;
+              }			              
+              slice_vertical_x750
+              {
+                  type         plane;
+                  basePoint    (750.01 500.01 119.01);
+                  normalVector (1 0 0);
+                  triangulate  false;
+              }		
+              slice_vertical_x1000
+              {
+                  type         plane;
+                  basePoint    (1000.01 500.01 119.01);
+                  normalVector (1 0 0);
+                  triangulate  false;
+              }			              
+              slice_vertical_x1250
+              {
+                  type         plane;
+                  basePoint    (1250.01 500.01 119.01);
+                  normalVector (1 0 0);
+                  triangulate  false;
+              }	
+              slice_vertical_x1500
+              {
+                  type         plane;
+                  basePoint    (1500.01 500.01 119.01);
+                  normalVector (1 0 0);
+                  triangulate  false;
+              }			
+              slice_vertical_x1750
+              {
+                  type         plane;
+                  basePoint    (1750.01 500.01 119.01);
+                  normalVector (1 0 0);
+                  triangulate  false;
+              }			  
+          );
+      }
