@@ -4,7 +4,7 @@
 
 # User input
 startTime=0                     # Start time
-refineMeshLocal=0               # Number of levels of local refinement (requires 
+refineMeshLocal=2               # Number of levels of local refinement (requires 
                                 # system/topoSetDict and system/refineHexMeshDict).
 
 
