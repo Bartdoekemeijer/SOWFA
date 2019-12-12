@@ -29,6 +29,8 @@ OpenFOAM-2.4.x()
    module load openfoam/2.4.0
    module load torque/4.2.10
    module load maui/3.3.1
+   module load LOCAL
+   module load matlab
    module list
 
    # Set the OpenFOAM version and installation directory
