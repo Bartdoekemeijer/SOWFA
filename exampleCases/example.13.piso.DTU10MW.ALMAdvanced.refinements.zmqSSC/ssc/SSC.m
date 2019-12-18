@@ -1,7 +1,7 @@
 %% SSC EXAMPLE FUNCTION
 
 % Setup zeroMQ server
-zmqServer = zeromqObj('/home/bmdoekemeijer/OpenFOAM/zeroMQ/jeromq-0.4.4-SNAPSHOT.jar',1711,3600,true);
+zmqServer = zeromqObj('/home/bmdoekemeijer/OpenFOAM/bmdoekemeijer-2.4.0/jeromq/jeromq-0.4.4-SNAPSHOT.jar',1711,3600,true);
 
 % Load the yaw setpoint LUT and set-up a simple function
 nTurbs = 2;
