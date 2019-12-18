@@ -1,7 +1,7 @@
 %% SSC EXAMPLE FUNCTION
 
 % Setup zeroMQ server
-zmqServer = zeromqObj('/home/bmdoekemeijer/OpenFOAM/zeroMQ/jeromq-0.4.4-SNAPSHOT.jar',1196,3600,true);
+zmqServer = zeromqObj('/home/bmdoekemeijer/OpenFOAM/bmdoekemeijer-2.4.0/jeromq/jeromq-0.4.4-SNAPSHOT.jar',1196,3600,true);
 
 % Load the yaw setpoint LUT and set-up a simple function
 nTurbs = 2;
@@ -18,9 +18,9 @@ while 1
     currentTime  = dataReceived(1,1);
     measurementVector = dataReceived(1,2:end); % [powerGenerator[1], torqueRotor[1], thrust[1], powerGenerator[2], torqueRotor[2], thrust[2]]
     
-    powerGenerator = measurementVector(1:nTurbs:end);
-    torqueRotor = measurementVector(2:nTurbs:end);
-    thrust = measurementVector(3:nTurbs:end);
+    powerGenerator = measurementVector(1:3:end);
+    torqueRotor = measurementVector(2:3:end);
+    thrust = measurementVector(3:3:end);
 
     % Do something with our measurements
     % ...

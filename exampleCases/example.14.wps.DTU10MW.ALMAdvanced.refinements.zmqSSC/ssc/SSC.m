@@ -18,9 +18,9 @@ while 1
     currentTime  = dataReceived(1,1);
     measurementVector = dataReceived(1,2:end); % [generatorPower[1], rotorSpeed[1], rotorAxialForce[1], generatorPower[2], rotorSpeed[2], rotorAxialForce[2]]
     
-    powerGenerator = measurementVector(1:nTurbs:end);
-    torqueRotor = measurementVector(2:nTurbs:end);
-    thrust = measurementVector(3:nTurbs:end);
+    powerGenerator = measurementVector(1:3:end);
+    torqueRotor = measurementVector(2:3:end);
+    thrust = measurementVector(3:3:end);
 
     % Do something with our measurements
     % ...
