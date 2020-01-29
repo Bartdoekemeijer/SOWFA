@@ -28,6 +28,9 @@ export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64:$LD_LIBRARY_PA
 # Get the control dictionary for this particular run.
 cp system/controlDict.$runNumber system/controlDict
 
+# Find an available ZeroMQ port and save it to ssc/SSC.m and constant/turbineArrayProperties
+python zmqPortScheduler.py > log.$runNumber.zmqPortScheduler 2>&1
+
 # Run the solver and the MATLAB controller in parallel
 (mpirun -np $cores $solver -parallel > log.$runNumber.$solver 2>&1) &
 (cd ssc; matlab -nodisplay -noFigureWindows -logfile 'SSC_out.log' -r SSC)

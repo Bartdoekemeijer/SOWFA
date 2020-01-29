@@ -1,11 +1,10 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=20
 #PBS -N "piso.10MW.ALMAdv.zmqSSC"
-#PBS -q guest
 
 # User input
 startTime=0                 # Start time
-cores=20                     # Enter the number of cores you will preprocess on.
+cores=20                    # Enter the number of cores you will preprocess on.
 runNumber=1                 # Enter the run number (useful for keeping track of restarts).
 solver=pisoFoamTurbine.ALMAdvanced  # Enter the name of the flow solver.
 
@@ -28,6 +27,9 @@ export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64:$LD_LIBRARY_PA
 
 # Get the control dictionary for this particular run.
 cp system/controlDict.$runNumber system/controlDict
+
+# Find an available ZeroMQ port and save it to ssc/SSC.m and constant/turbineArrayProperties
+python zmqPortScheduler.py > log.$runNumber.zmqPortScheduler 2>&1
 
 # Run the solver and the MATLAB controller in parallel
 (mpirun -np $cores $solver -parallel > log.$runNumber.$solver 2>&1) &
