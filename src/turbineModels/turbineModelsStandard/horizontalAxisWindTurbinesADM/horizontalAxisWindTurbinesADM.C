@@ -378,11 +378,6 @@ horizontalAxisWindTurbinesADM::horizontalAxisWindTurbinesADM
         {
             // Read nothing.
         }
-        else if (NacYawControllerType[i] == "timeYawTable")
-        {
-        }
-
-
 
 
         AirfoilType.append(turbineProperties.lookup("Airfoils"));
@@ -1023,37 +1018,49 @@ void horizontalAxisWindTurbinesADM::controlNacYaw()
         // Get the turbine type index.
         int j = turbineTypeID[i];
 
+        // Initialize the commanded nacelle yaw variable;
+        scalar nacYawCommanded = nacYaw[i];
+        
         // Apply a controller to update the nacelle yaw position.
         if (NacYawControllerType[j] == "none")
         {
             // Do nothing.
-            deltaNacYaw[i] = 0.0;
         }
 
-        else if (NacYawControllerType[j] == "simple")
-        {
-            // Placeholder for when this is implemented.
-        }
-        
-        else if (NacYawControllerType[j] == "timeYawTable")
-        {
-        }
-
-        // _SSC_, set a case for yawSC
-        // simple function assumes the first entry per turbine in 
-        // superInfoFromSSC is a yaw reference to seek
+        // SSC: Yaw controller following SSC setpoints
         else if (NacYawControllerType[j] == "yawSC")
         {
-            #include "controllers/yawControllers/yawSC.H"
+            #include "controllers/nacYawControllers/yawSC.H"
         }
-
-
         
-        // Limit the change in nacelle yaw angle.
+        deltaNacYaw[i] = nacYawCommanded - nacYaw[i]; // Standard calculation of delta yaw
+        
+        // Ensure deltaNacYaw lies within [-360, 360] deg 
+        if ((deltaNacYaw[i] / degRad) <= - 360.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] + (360.0*degRad);
+        }
+        else if ((deltaNacYaw[i] / degRad) >= 360.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] - (360.0*degRad);
+        }        
+        
+        // Now find the shortest distance to the setpoint
+        if ((deltaNacYaw[i] / degRad) <= - 180.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] + (360.0*degRad);
+        }
+        else if ((deltaNacYaw[i] / degRad) >= 180.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] - (360.0*degRad);
+        }
+    
+        
+         // Limit the change in nacelle yaw angle.
         if (NacYawRateLimiter[j])
         {
+            #include "limiters/nacYawRateLimiter.H"
         }
-
     }
 }
         
