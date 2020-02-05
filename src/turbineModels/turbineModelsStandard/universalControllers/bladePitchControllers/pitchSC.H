@@ -1,0 +1,1 @@
+            bladePitchCommanded = superInfoFromSSC[i*nOutputsFromSSC+2];

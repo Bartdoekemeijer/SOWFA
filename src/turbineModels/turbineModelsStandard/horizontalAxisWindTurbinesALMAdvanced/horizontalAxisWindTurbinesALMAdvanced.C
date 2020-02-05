@@ -1837,11 +1837,17 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
             #include "../universalControllers/bladePitchControllers/PID.H"
         }
         
-        //_SSC_: allow a pidSC controller where the minimum pitch is chosen by super controller
+        //_SSC_: a PID controller where the minimum pitch is chosen by super controller
         else if (BladePitchControllerType[j] == "PIDSC")
         {
             scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2]; // in degrees
             #include "../universalControllers/bladePitchControllers/PID.H"
+        }
+        
+        //_SSC_: directly assign blade pitch angles by super controller
+        else if (BladePitchControllerType[j] == "pitchSC")
+        {
+            #include "../universalControllers/bladePitchControllers/pitchSC.H"
         }
         
         // Apply pitch rate limiter.
