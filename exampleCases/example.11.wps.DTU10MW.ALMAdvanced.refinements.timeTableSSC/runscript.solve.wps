@@ -18,6 +18,8 @@ echo "using " $cores " cores"
 # Load the OpenFOAM module on the cluster
 echo "Loading the OpenFOAM module..."
 module load openfoam/2.4.0
+
+# define the ZeroMQ paths
 export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
 export ZEROMQ_LIB=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64
 export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib:$LD_LIBRARY_PATH
