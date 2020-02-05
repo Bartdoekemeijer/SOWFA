@@ -17,17 +17,16 @@
                 scalar derivSpeedError = (speedError[i] - speedErrorLast) / dt;
 
                 // Saturate the integrated speed error based on pitch saturation.
-                intSpeedError[i] = min(max(intSpeedError[i], minBladePitch/(GK*PitchControlKI[j])), PitchMax[j]/(GK*PitchControlKI[j]));
+                intSpeedError[i] = min(max(intSpeedError[i], minBladePitch*degRad/(GK*PitchControlKI[j])), PitchMax[j]/(GK*PitchControlKI[j]));
 
                 // Compute the pitch components from the proportional, integral,
                 // and derivative parts and sum them.
                 scalar pitchP = GK * PitchControlKP[j] * speedError[i];
                 scalar pitchI = GK * PitchControlKI[j] * intSpeedError[i];
                 scalar pitchD = GK * PitchControlKD[j] * derivSpeedError;
-                bladePitchCommanded = pitchP + pitchI + pitchD;
+                bladePitchCommanded = (pitchP + pitchI + pitchD) / degRad;
 
-                // Saturate the pitch based on the pitch limits of the pitch
-                // actuator.
+                // Saturate the pitch based on the pitch limits of the pitch actuator.
                 bladePitchCommanded = min(max(bladePitchCommanded, minBladePitch), PitchMax[j]);
             }
             // If first call to controller, initialize some values.

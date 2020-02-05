@@ -1814,14 +1814,14 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
         int j = turbineTypeID[i];
         
         // Initialize relevant variables to use universal controller functions
-        scalar currentBladePitch = bladePitch[i];
+        scalar currentBladePitch = bladePitch[i]; // In degrees
         scalar currentRotorSpeedF = rotorSpeedF[i];
         
         // Initialize the gain scheduling variable.
         scalar GK = 0.0;
 
         // Initialize the commanded pitch variable.
-        scalar bladePitchCommanded = currentBladePitch*degRad;
+        scalar bladePitchCommanded = currentBladePitch; // In degrees
 
 
         // Apply a controller to update the blade pitch position.
@@ -1832,14 +1832,14 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
 
         else if (BladePitchControllerType[j] == "PID")
         {
-            scalar minBladePitch = PitchMin[j];
+            scalar minBladePitch = PitchMin[j]; // in degrees
             #include "../universalControllers/bladePitchControllers/PID.H"
         }
         
         //_SSC_: allow a pidSC controller where the minimum pitch is chosen by super controller
         else if (BladePitchControllerType[j] == "PIDSC")
         {
-            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2];
+            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2]; // in degrees
             #include "../universalControllers/bladePitchControllers/PID.H"
         }
         
@@ -1850,7 +1850,7 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
         }
 
         // Update the pitch array.
-        bladePitch[i] = bladePitchCommanded/degRad;
+        bladePitch[i] = bladePitchCommanded;
     }
 }
 

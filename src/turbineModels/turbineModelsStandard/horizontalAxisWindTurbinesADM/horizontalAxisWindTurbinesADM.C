@@ -1171,7 +1171,7 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
         scalar GK = 0.0;
         
         // Initialize the commanded pitch variable.
-        scalar bladePitchCommanded = currentBladePitch*degRad;
+        scalar bladePitchCommanded = currentBladePitch; // In degrees
 
 
         // Apply a controller to update the blade pitch position.
@@ -1200,7 +1200,7 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
         }
 
         // Update the pitch array.
-        pitch[i] = bladePitchCommanded/degRad;
+        pitch[i] = bladePitchCommanded;
     }
 }
 
