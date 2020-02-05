@@ -1643,9 +1643,9 @@ void horizontalAxisWindTurbinesALMAdvanced::controlGenTorque()
         {
             #include "controllers/genTorqueControllers/speedTorqueTable.H"
         }
-			        else if (GenTorqueControllerType[j] == "TorqueSC")
+			        else if (GenTorqueControllerType[j] == "torqueSC")
         {
-            #include "controllers/genTorqueControllers/TorqueSC.H"
+            #include "controllers/genTorqueControllers/torqueSC.H"
         }
 
         // Limit the change in generator torque.
@@ -1677,25 +1677,14 @@ void horizontalAxisWindTurbinesALMAdvanced::controlNacYaw()
             // Do nothing.
         }
 
-        else if (NacYawControllerType[j] == "simple")
-        {
-            // Placeholder for when this is implemented.
-        }
-        
-        else if (NacYawControllerType[j] == "timeYawTable")
-        {
-            #include "controllers/nacYawControllers/timeYawTable.H"
-        }
-        // _SSC_, set a case for yawSC
-        // simple function assumes the first entry per turbine in 
-        // superInfoFromSSC is a yaw reference to seek
+        // SSC: Yaw controller following SSC setpoints
         else if (NacYawControllerType[j] == "yawSC")
         {
-            #include "controllers/nacYawControllers/yawSC.H"
+            #include "../universalControllers/nacYawControllers/yawSC.H"
         }
         
-      //Info << "nacYaw = " << nacYaw << endl;
         deltaNacYaw[i] = nacYawCommanded - nacYaw[i]; // Standard calculation of delta yaw
+        
         // Ensure deltaNacYaw lies within [-360, 360] deg 
         if ((deltaNacYaw[i] / degRad) <= - 360.0)
         {
@@ -1715,14 +1704,12 @@ void horizontalAxisWindTurbinesALMAdvanced::controlNacYaw()
         {
             deltaNacYaw[i] = deltaNacYaw[i] - (360.0*degRad);
         }
-      //Info << "deltaNacYaw = " << deltaNacYaw / degRad << endl;
    
          // Limit the change in nacelle yaw angle.
         if (NacYawRateLimiter[j])
         {
-            #include "limiters/nacYawRateLimiter.H"
+            #include "../universalLimiters/nacYawRateLimiter.H"
         }
-      //Info << "deltaNacYaw = " << deltaNacYaw / degRad << endl;
     }
 }
 

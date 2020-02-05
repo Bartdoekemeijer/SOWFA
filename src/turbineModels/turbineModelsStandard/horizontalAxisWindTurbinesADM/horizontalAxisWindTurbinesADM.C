@@ -1058,7 +1058,7 @@ void horizontalAxisWindTurbinesADM::controlNacYaw()
          // Limit the change in nacelle yaw angle.
         if (NacYawRateLimiter[j])
         {
-            #include "limiters/nacYawRateLimiter.H"
+            #include "../universalLimiters/nacYawRateLimiter.H"
         }
     }
 }
