@@ -30,7 +30,7 @@ sscProperties
     nOutputsFromSSC     3; // Control variables: [genTorque, nacYaw, bladePitch]
     sscControllerType   "zeromqSSC"; // The type of SSC
     sscMeasurementsFunction "default"; // Measurements function
-    zmqAddress          "tcp://localhost:1196"; // zeroMQ connection port    
+    zmqAddress          "tcp://localhost:1876"; // zeroMQ connection port    
 }
 
 turbine0
