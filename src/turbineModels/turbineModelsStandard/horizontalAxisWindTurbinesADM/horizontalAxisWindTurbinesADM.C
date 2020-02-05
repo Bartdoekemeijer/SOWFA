@@ -1163,38 +1163,44 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
         // Get the turbine type index.
         int j = turbineTypeID[i];
         
+        // Initialize relevant variables to use universal controller functions
+        scalar currentBladePitch = pitch[i];
+        scalar currentRotorSpeedF = rotSpeedF[i];
+        
         // Initialize the gain scheduling variable.
         scalar GK = 0.0;
-
+        
         // Initialize the commanded pitch variable.
-        scalar pitchCommanded = pitch[i]*degRad;
+        scalar bladePitchCommanded = currentBladePitch*degRad;
 
 
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "none")
         {
-            #include "controllers/bladePitchControllers/none.H"
+            #include "../universalControllers/bladePitchControllers/none.H"
         }
 
         else if (BladePitchControllerType[j] == "PID")
         {
-            #include "controllers/bladePitchControllers/PID.H"
+            scalar minBladePitch = PitchMin[j];
+            #include "../universalControllers/bladePitchControllers/PID.H"
         }
         
         //_SSC_: allow a pidSC controller where the minimum pitch is chosen by super controller
         else if (BladePitchControllerType[j] == "PIDSC")
         {
-            #include "controllers/bladePitchControllers/PIDSC.H"
+            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2];
+            #include "../universalControllers/bladePitchControllers/PID.H"
         }
 
         // Apply pitch rate limiter.
         if (BladePitchRateLimiter[j])
         {
-            #include "limiters/bladePitchRateLimiter.H"
+            #include "../universalLimiters/bladePitchRateLimiter.H"
         }
 
         // Update the pitch array.
-        pitch[i] = pitchCommanded/degRad;
+        pitch[i] = bladePitchCommanded/degRad;
     }
 }
 

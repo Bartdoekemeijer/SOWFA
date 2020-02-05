@@ -1813,32 +1813,40 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
         // Get the turbine type index.
         int j = turbineTypeID[i];
         
+        // Initialize relevant variables to use universal controller functions
+        scalar currentBladePitch = bladePitch[i];
+        scalar currentRotorSpeedF = rotorSpeedF[i];
+        
         // Initialize the gain scheduling variable.
         scalar GK = 0.0;
 
         // Initialize the commanded pitch variable.
-        scalar bladePitchCommanded = bladePitch[i]*degRad;
+        scalar bladePitchCommanded = currentBladePitch*degRad;
 
 
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "none")
         {
-            #include "controllers/bladePitchControllers/none.H"
+            #include "../universalControllers/bladePitchControllers/none.H"
         }
 
         else if (BladePitchControllerType[j] == "PID")
         {
-            #include "controllers/bladePitchControllers/PID.H"
+            scalar minBladePitch = PitchMin[j];
+            #include "../universalControllers/bladePitchControllers/PID.H"
         }
+        
         //_SSC_: allow a pidSC controller where the minimum pitch is chosen by super controller
         else if (BladePitchControllerType[j] == "PIDSC")
         {
-            #include "controllers/bladePitchControllers/PIDSC.H"
+            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2];
+            #include "../universalControllers/bladePitchControllers/PID.H"
         }
+        
         // Apply pitch rate limiter.
         if (BladePitchRateLimiter[j])
         {
-            #include "limiters/bladePitchRateLimiter.H"
+            #include "../universalLimiters/bladePitchRateLimiter.H"
         }
 
         // Update the pitch array.
@@ -1847,14 +1855,12 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
 }
 
 
-
 void horizontalAxisWindTurbinesALMAdvanced::findBladePointControlProcNo()
 {
     // Create a local and global list of minimum distance cells to velocity sampling 
     // points of turbines that this processor controls.  Initialize the values to huge.
     List<scalar> minDisLocalBlade(totBladePoints,1.0E30);
     List<scalar> minDisGlobalBlade(totBladePoints,1.0E30);
-
 
     forAll(bladesControlled, p)
     {
