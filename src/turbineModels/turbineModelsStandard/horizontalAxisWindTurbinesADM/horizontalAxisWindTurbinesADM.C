@@ -968,44 +968,43 @@ void horizontalAxisWindTurbinesADM::controlGenTorque()
         // Get the turbine type index.
         int j = turbineTypeID[i];
 
+        // Get initial generator torque value
+        scalar currentGenTorque = torqueGen[i];
+        
         // Get the current filtered generator speed.
         scalar genSpeedF = (rotSpeedF[i]/rpmRadSec)*GBRatio[j];
 
-
         // Initialize the commanded generator torque variable;
-        scalar torqueGenCommanded = torqueGen[i];
-
-
+        scalar generatorTorqueCommanded = currentGenTorque;
 
         // Apply a controller to update the rotor speed.
         if (GenTorqueControllerType[j] == "none")
         {
-            #include "controllers/genTorqueControllers/none.H"
+            #include "../universalControllers/genTorqueControllers/none.H"
         }
     
         else if (GenTorqueControllerType[j] == "fiveRegion")
         {
-            #include "controllers/genTorqueControllers/fiveRegion.H"
+            #include "../universalControllers/genTorqueControllers/fiveRegion.H"
         }
 
         else if (GenTorqueControllerType[j] == "speedTorqueTable")
         {
-            #include "controllers/genTorqueControllers/speedTorqueTable.H"
+            #include "../universalControllers/genTorqueControllers/speedTorqueTable.H"
         }
         else if (GenTorqueControllerType[j] == "torqueSC")
         {
-            #include "controllers/genTorqueControllers/torqueSC.H"
+            //#include "controllers/genTorqueControllers/torqueSC.H"
         }
       
-
         // Limit the change in generator torque.
         if (GenTorqueRateLimiter[j])
         {
-            #include "limiters/genTorqueRateLimiter.H"
+            #include "../universalLimiters/genTorqueRateLimiter.H"
         }
 
         // Update the pitch array.
-        torqueGen[i] = torqueGenCommanded;
+        torqueGen[i] = generatorTorqueCommanded;
     }
 }
         
