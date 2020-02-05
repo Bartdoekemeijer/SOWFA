@@ -994,7 +994,7 @@ void horizontalAxisWindTurbinesADM::controlGenTorque()
         }
         else if (GenTorqueControllerType[j] == "torqueSC")
         {
-            //#include "controllers/genTorqueControllers/torqueSC.H"
+            #include "../universalControllers/genTorqueControllers/torqueSC.H"
         }
       
         // Limit the change in generator torque.
