@@ -34,7 +34,7 @@ RatedRotSpeed              12.1;
 GenIner                   534.116;
 HubIner                   115.926E3;
 BladeIner                  11.776047E6;
-GenTorqueControllerType    "fiveRegion";
+GenTorqueControllerType    "torqueSC";
 //GenTorqueControllerType  "speedTorqueTable";
 //GenTorqueControllerType  "none";
 BladePitchControllerType   "PIDSC";
