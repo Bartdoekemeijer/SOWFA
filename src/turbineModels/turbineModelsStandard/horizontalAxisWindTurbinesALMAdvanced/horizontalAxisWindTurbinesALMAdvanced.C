@@ -1584,7 +1584,9 @@ void horizontalAxisWindTurbinesALMAdvanced::computeRotSpeed()
         // faster than rated.
         if (RotSpeedLimiter[j])
         {
-            #include "limiters/rotSpeedLimiter.H"
+            // Limit the rotor speed to be positive and such that the generator does not turn
+            // faster than rated.
+            rotorSpeed[i] = min(max(0.0,rotorSpeed[i]),RatedRotSpeed[j]);
         }
  
         // Compute the change in blade azimuth angle based on the time step and current rotor speed.
