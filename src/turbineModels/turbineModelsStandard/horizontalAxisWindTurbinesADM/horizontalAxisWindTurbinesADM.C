@@ -1030,7 +1030,7 @@ void horizontalAxisWindTurbinesADM::controlNacYaw()
         // SSC: Yaw controller following SSC setpoints
         else if (NacYawControllerType[j] == "yawSC")
         {
-            #include "controllers/nacYawControllers/yawSC.H"
+            #include "../universalControllers/nacYawControllers/yawSC.H"
         }
         
         deltaNacYaw[i] = nacYawCommanded - nacYaw[i]; // Standard calculation of delta yaw
@@ -1055,7 +1055,6 @@ void horizontalAxisWindTurbinesADM::controlNacYaw()
             deltaNacYaw[i] = deltaNacYaw[i] - (360.0*degRad);
         }
     
-        
          // Limit the change in nacelle yaw angle.
         if (NacYawRateLimiter[j])
         {
