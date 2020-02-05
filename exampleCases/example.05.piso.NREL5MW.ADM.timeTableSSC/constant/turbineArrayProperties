@@ -22,12 +22,21 @@ globalProperties
     outputInterval       1;
 }
 
+        superInfoToSSC[i*nInputsToSSC+0] = powerGenerator[i]; // Generator power [W]
+        superInfoToSSC[i*nInputsToSSC+1] = rotSpeedF[i];      // Filtered rotor speed [rad/s]
+        superInfoToSSC[i*nInputsToSSC+2] = azimuth[i]/degRad; // Azimuth angle [deg]
+        superInfoToSSC[i*nInputsToSSC+3] = thrust[i];         // Turbine thrust force [N]
+        superInfoToSSC[i*nInputsToSSC+4] = torqueRotor[i];    // Rotor torque [Nm]
+        superInfoToSSC[i*nInputsToSSC+5] = torqueGen[i];      // Generator torque [Nm]
+        superInfoToSSC[i*nInputsToSSC+6] = nacYaw[i]/degRad;  // Nacelle yaw [deg]
+        superInfoToSSC[i*nInputsToSSC+7] = pitch[i];          // Pitch angle [deg]
+        
 // _SSC_
 sscProperties
 {
     sscEnabled          true; //Enable or disable SSC. If sscProperties{} not present, defaults to 'false'
-    nInputsToSSC        3; // Number of inputs EACH turbine passes to the super controller
-    nOutputsFromSSC     2; // Number of outputs the super controller sends to EACH turbine
+    nInputsToSSC        8; // Measurements: [genPower,rotSpeedF,azimuth,rotThrust,rotTorque,genTorque,nacYaw,bladePitch]
+    nOutputsFromSSC     3; // Control variables: [genTorque, nacYaw, bladePitch]
     sscControllerType   "timeTableSSC"; // The type of SSC
     sscMeasurementsFunction "default"; // Measurements function
 }
