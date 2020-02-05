@@ -525,8 +525,8 @@ horizontalAxisWindTurbinesADM::horizontalAxisWindTurbinesADM
     SpeedFilterCornerFrequency = rpsRadSec * SpeedFilterCornerFrequency;
     RatedRotSpeed = rpmRadSec * RatedRotSpeed;
     PitchK = degRad * PitchK;
-    PitchMin = degRad * PitchMin;
-    PitchMax = degRad * PitchMax;
+    //PitchMin = degRad * PitchMin;
+    //PitchMax = degRad * PitchMax;
     forAll(PreCone,i)
     {
         PreCone[i] = degRad * PreCone[i];
@@ -1173,7 +1173,6 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
         // Initialize the commanded pitch variable.
         scalar bladePitchCommanded = currentBladePitch; // In degrees
 
-
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "none")
         {
@@ -1182,23 +1181,23 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
 
         else if (BladePitchControllerType[j] == "PID")
         {
-            scalar minBladePitch = PitchMin[j];
+            scalar minBladePitch = PitchMin[j]; // in degrees
             #include "../universalControllers/bladePitchControllers/PID.H"
         }
         
         //_SSC_: allow a pidSC controller where the minimum pitch is chosen by super controller
         else if (BladePitchControllerType[j] == "PIDSC")
         {
-            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2];
+            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2]; // in degrees
             #include "../universalControllers/bladePitchControllers/PID.H"
         }
-
+        
         // Apply pitch rate limiter.
         if (BladePitchRateLimiter[j])
         {
             #include "../universalLimiters/bladePitchRateLimiter.H"
         }
-
+        
         // Update the pitch array.
         pitch[i] = bladePitchCommanded;
     }

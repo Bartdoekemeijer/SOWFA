@@ -729,8 +729,8 @@ horizontalAxisWindTurbinesALMAdvanced::horizontalAxisWindTurbinesALMAdvanced
     SpeedFilterCornerFrequency = rpsRadSec * SpeedFilterCornerFrequency;
     RatedRotSpeed = rpmRadSec * RatedRotSpeed;
     PitchK = degRad * PitchK;
-    PitchMin = degRad * PitchMin;
-    PitchMax = degRad * PitchMax;
+    //PitchMin = degRad * PitchMin;
+    //PitchMax = degRad * PitchMax;
     forAll(PreCone,i)
     {
         PreCone[i] = degRad * PreCone[i];
@@ -1822,7 +1822,6 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
 
         // Initialize the commanded pitch variable.
         scalar bladePitchCommanded = currentBladePitch; // In degrees
-
 
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "none")

@@ -17,7 +17,7 @@
                 scalar derivSpeedError = (speedError[i] - speedErrorLast) / dt;
 
                 // Saturate the integrated speed error based on pitch saturation.
-                intSpeedError[i] = min(max(intSpeedError[i], minBladePitch*degRad/(GK*PitchControlKI[j])), PitchMax[j]/(GK*PitchControlKI[j]));
+                intSpeedError[i] = min(max(intSpeedError[i], minBladePitch*degRad/(GK*PitchControlKI[j])), PitchMax[j]*degRad/(GK*PitchControlKI[j]));
 
                 // Compute the pitch components from the proportional, integral,
                 // and derivative parts and sum them.
