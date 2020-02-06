@@ -1838,12 +1838,7 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "ipcSC")
         {
-            // Copy collective blade pitch angles to individual blade pitch angles
-            for(int ibl = 0; ibl < numberOfBlades; ibl++)
-            {
-                // Import pitch angles from SSC, assuming entry [2] for blade [0] and onwards
-                individualBladePitchCommanded.append(superInfoFromSSC[i*nOutputsFromSSC+2+ibl]);
-            }
+            #include "controllers/bladePitchControllers/ipcSC.H"
         }
         else {
             // DO CYLIC PITCH CONTROL: SAME VALUE FOR EACH BLADE
