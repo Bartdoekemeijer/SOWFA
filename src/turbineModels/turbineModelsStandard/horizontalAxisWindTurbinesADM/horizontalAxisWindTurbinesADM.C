@@ -1164,15 +1164,33 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
         // Get the turbine type index.
         int j = turbineTypeID[i];
         
+        /*
+        
+        
+        
+        
+          In ALMAdvanced, code is placed here to 
+          enable individual pitch control.
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        */
+       
         // Initialize relevant variables to use universal controller functions
-        scalar currentBladePitch = pitch[i]; // In degrees
+        scalar collectiveBladePitchCurrent = pitch[i]; // In degrees
         scalar currentRotorSpeedF = rotSpeedF[i];
         
         // Initialize the gain scheduling variable.
         scalar GK = 0.0;
         
         // Initialize the commanded pitch variable.
-        scalar bladePitchCommanded = currentBladePitch; // In degrees
+        scalar collectiveBladePitchCommanded = collectiveBladePitchCurrent; // In degrees
 
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "none")
@@ -1199,14 +1217,28 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
             #include "../universalControllers/bladePitchControllers/pitchSC.H"
         }
         
+        /*
+        
+        
+        
+        
+        
+        */
+        
         // Apply pitch rate limiter.
         if (BladePitchRateLimiter[j])
         {
-            #include "../universalLimiters/bladePitchRateLimiter.H"
+            /*
+            
+            */
+            scalar bladePitchCommanded = collectiveBladePitchCommanded;
+            scalar currentBladePitch = collectiveBladePitchCurrent; 
+            #include "../universalLimiters/bladePitchRateLimiter.H"   // Apply limiter
+            collectiveBladePitchCommanded = bladePitchCommanded; // Overwrite setpoint        
         }
         
         // Update the pitch array.
-        pitch[i] = bladePitchCommanded;
+        pitch[i] = collectiveBladePitchCommanded;
     }
 }
 

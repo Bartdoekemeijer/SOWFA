@@ -306,7 +306,9 @@ private:
             DynamicList<scalar> generatorTorque;
 
             //- Initial blade pitch (degrees) of all blades.
-            DynamicList<scalar> bladePitch;
+            // DynamicList<scalar> bladePitch;
+            DynamicList<DynamicList<scalar> > bladePitch; // IPC implementation
+            DynamicList<scalar> bladePitchCollectiveInitial; // IPC implementation
 
             //- Initial or fixed nacelle yaw angle.  Direction that the turbine
             //  is pointed in cardinal directions (i.e. 0 = north, 90 = east, 

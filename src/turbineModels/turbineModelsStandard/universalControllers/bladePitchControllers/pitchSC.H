@@ -1,1 +1,1 @@
-            bladePitchCommanded = superInfoFromSSC[i*nOutputsFromSSC+2];
+            collectiveBladePitchCommanded = superInfoFromSSC[i*nOutputsFromSSC+2];
