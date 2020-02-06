@@ -27,7 +27,7 @@ while 1
     rotorTorqueArray    = measurementVector(5:8:end);
     genTorqueArray      = measurementVector(6:8:end);
     nacelleYawArray     = measurementVector(7:8:end);
-    bladePitchArray     = measurementVector(8:8:end);
+    bladePitchArray     = measurementVector(8:8:end); % Pitch angles of blade[0] of each turbine
     
     % Do something with our measurements
     % ...

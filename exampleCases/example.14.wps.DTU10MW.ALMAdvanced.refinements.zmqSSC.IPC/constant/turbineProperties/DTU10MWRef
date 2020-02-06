@@ -15,33 +15,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-NumBl                       3;    
-TipRad                      89.2; 
-HubRad                      2.8;  
-UndSling                    0.0;  
-OverHang                   -7.1;  
-NacelleLength               8; 
-NacelleFrontalArea          2;  
-NacelleCd                   0.5;  
-TowerHt                    115.63; 
-Twr2Shft                    2.75;  
-ShftTilt                   -5.0;   
-PreCone                   (-2.5 -2.5 -2.5); 
-GBRatio                    50.0;
-GBEfficiency                1.0;
-GenEfficiency               1.0;
-RatedRotSpeed              9.6;  
-GenIner                   1500.5;
-HubIner                   325.6709E3; 
-BladeIner                  45.64E6;  
-GenTorqueControllerType    "fiveRegion"; 
-BladePitchControllerType   "PIDSC"; 
-NacYawControllerType       "yawSC";
-RotSpeedLimiter             false; 
-GenTorqueRateLimiter        false; 
-NacYawRateLimiter           true;  
-BladePitchRateLimiter       false; 
-SpeedFilterCornerFrequency  2.5;  
+NumBl                       3;     
+TipRad                      89.2;  
+HubRad                      2.8;   
+UndSling                    0.0;   
+OverHang                   -7.1;   
+NacelleLength               8;
+NacelleFrontalArea          2;
+NacelleCd                   0.5;
+TowerHt                    115.63;  
+Twr2Shft                    2.75;   
+ShftTilt                   -5.0;    
+PreCone                   (-2.5 -2.5 -2.5);  
+GBRatio                    50.0;   
+GBEfficiency                1.0;   
+GenEfficiency               1.0;   
+RatedRotSpeed              9.6;    
+GenIner                   1500.5;  
+HubIner                   325.6709E3;  
+BladeIner                  45.64E6;    
+GenTorqueControllerType    "fiveRegion";  
+BladePitchControllerType   "ipcSC";   
+NacYawControllerType       "yawSC";  
+RotSpeedLimiter             false;  
+GenTorqueRateLimiter        false;    
+NacYawRateLimiter           true;   
+BladePitchRateLimiter       false;  
+SpeedFilterCornerFrequency  2.5;    
 
 /*
    WIND TURBINE CONTROLLER OPTIONS:
@@ -62,7 +62,7 @@ SpeedFilterCornerFrequency  2.5;
 
 GenTorqueControllerParams
 {
-    RateLimitGenTorque       15.0E4; 
+    RateLimitGenTorque       15.0E4;  
     SpeedTorqueTable
     (
         //      gen speed (RPM) gen torque (N-m)
