@@ -53,7 +53,8 @@ SpeedFilterCornerFrequency  2.0;
      BladePitchControllerType   "none"; // Keep pitch fixed, no control (ignore SC)
      BladePitchControllerType   "PID"; // Traditional gain-scheduled PID controller, pitching for region III (ignore SC)
      BladePitchControllerType   "PIDSC"; // PID controller where the SC assigns the minimum pitch angle
-     BladePitchControllerType   "pitchSC"; // SC directly assigns pitch angles
+     BladePitchControllerType   "pitchSC"; // SC directly assigns the collective pitch angle (scalar)
+     BladePitchControllerType   "ipcSC"; // SC directly assigns the individual pitch angles (array of length nBlades)
      
      NacYawControllerType       "none"; // Keep yaw fixed, no control (ignore SC)
      NacYawControllerType       "yawSC"; // SC directly assigns yaw angles

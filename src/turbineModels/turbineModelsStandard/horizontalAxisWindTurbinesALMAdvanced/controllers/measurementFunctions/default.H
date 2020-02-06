@@ -10,5 +10,5 @@
         superInfoToSSC[i*nInputsToSSC+4] = rotorTorque[i];         // Rotor torque [Nm]
         superInfoToSSC[i*nInputsToSSC+5] = generatorTorque[i];     // Generator torque [Nm]
         superInfoToSSC[i*nInputsToSSC+6] = nacYaw[i]/degRad;       // Nacelle yaw [deg]
-        superInfoToSSC[i*nInputsToSSC+7] = bladePitch[i];          // Pitch angle [deg]
+        superInfoToSSC[i*nInputsToSSC+7] = bladePitch[i][0];       // Pitch angle of blade 0 [deg]
     }

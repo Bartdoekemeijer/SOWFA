@@ -329,8 +329,9 @@ horizontalAxisWindTurbinesALMAdvanced::horizontalAxisWindTurbinesALMAdvanced
 
         generatorTorque.append(scalar(readScalar(turbineArrayProperties.subDict(turbineName[i]).lookup("TorqueGen"))));
 
-        bladePitch.append(scalar(readScalar(turbineArrayProperties.subDict(turbineName[i]).lookup("Pitch"))));
-
+        //bladePitch.append(scalar(readScalar(turbineArrayProperties.subDict(turbineName[i]).lookup("Pitch"))));
+        bladePitchCollectiveInitial.append(scalar(readScalar(turbineArrayProperties.subDict(turbineName[i]).lookup("Pitch")))); // IPC implementation
+        
         nacYaw.append(scalar(readScalar(turbineArrayProperties.subDict(turbineName[i]).lookup("NacYaw"))));
 
         fluidDensity.append(scalar(readScalar(turbineArrayProperties.subDict(turbineName[i]).lookup("fluidDensity")))); 
@@ -600,7 +601,20 @@ horizontalAxisWindTurbinesALMAdvanced::horizontalAxisWindTurbinesALMAdvanced
     }
 
     
-
+    // IPC: Clone collective pitch angle from turbineArrayProperties to each individual blade, now knowing number of blades (numBl)
+    std::cout << "Clone collective pitch angle from turbineArrayProperties to each individual blade. " << std::endl;
+    forAll(turbineName,i){
+        int j = turbineTypeID[i];
+        int tmpNumberOfBlades = NumBl[j];
+        DynamicList<scalar> tmpBladePitchTurbine;
+        for(int ibl = 0; ibl < tmpNumberOfBlades; ibl++){
+             tmpBladePitchTurbine.append(bladePitchCollectiveInitial[i]); // Copy pitch angle tmpNumberOfBlades times to form one array
+        }
+        bladePitch.append(tmpBladePitchTurbine); // bladePitch is an array (per turbine) of arrays (per blade)
+        for(int ibl = 0; ibl < tmpNumberOfBlades; ibl++){
+             std::cout << "  Turbine[" << i << "]. Pitch[" << ibl << "]: " << bladePitch[i][ibl] << " deg " << std::endl;
+        }
+    }
 
     // Catalog the various distinct types of airfoils used in the various
     // distinct types of turbines.
@@ -1815,49 +1829,80 @@ void horizontalAxisWindTurbinesALMAdvanced::controlBladePitch()
         // Get the turbine type index.
         int j = turbineTypeID[i];
         
-        // Initialize relevant variables to use universal controller functions
-        scalar currentBladePitch = bladePitch[i]; // In degrees
-        scalar currentRotorSpeedF = rotorSpeedF[i];
+        // Get the number of blades
+        int numberOfBlades = NumBl[j];
         
-        // Initialize the gain scheduling variable.
-        scalar GK = 0.0;
-
-        // Initialize the commanded pitch variable.
-        scalar bladePitchCommanded = currentBladePitch; // In degrees
-
+        // Define a list for the commanded blade pitch angles
+        DynamicList<scalar> individualBladePitchCommanded;
+        
         // Apply a controller to update the blade pitch position.
-        if (BladePitchControllerType[j] == "none")
+        if (BladePitchControllerType[j] == "ipcSC")
         {
-            #include "../universalControllers/bladePitchControllers/none.H"
+            #include "controllers/bladePitchControllers/ipcSC.H"
+        }
+        else {
+            // DO CYLIC PITCH CONTROL: SAME VALUE FOR EACH BLADE
+            
+            // Initialize relevant variables to use universal controller functions
+            scalar collectiveBladePitchCurrent = bladePitch[i][0]; // Pitch angle of first blade [deg]
+            scalar currentRotorSpeedF = rotorSpeedF[i];
+            
+            // Initialize the gain scheduling variable.
+            scalar GK = 0.0;
+
+            // Initialize the commanded pitch variable.
+            scalar collectiveBladePitchCommanded = collectiveBladePitchCurrent; // [deg]
+        
+            if (BladePitchControllerType[j] == "none")
+            {
+                #include "../universalControllers/bladePitchControllers/none.H"
+            }
+
+            else if (BladePitchControllerType[j] == "PID")
+            {
+                scalar minBladePitch = PitchMin[j]; // in degrees
+                #include "../universalControllers/bladePitchControllers/PID.H"
+            }
+            
+            //_SSC_: a PID controller where the minimum pitch is chosen by super controller
+            else if (BladePitchControllerType[j] == "PIDSC")
+            {
+                scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2]; // in degrees
+                #include "../universalControllers/bladePitchControllers/PID.H"
+            }
+            
+            //_SSC_: directly assign blade pitch angles by super controller
+            else if (BladePitchControllerType[j] == "pitchSC")
+            {
+                #include "../universalControllers/bladePitchControllers/pitchSC.H"
+            }
+            
+            // Copy collective blade pitch angles to individual blade pitch angles
+            for(int ibl = 0; ibl < numberOfBlades; ibl++)
+            {
+                individualBladePitchCommanded.append(collectiveBladePitchCommanded);
+            }
         }
 
-        else if (BladePitchControllerType[j] == "PID")
-        {
-            scalar minBladePitch = PitchMin[j]; // in degrees
-            #include "../universalControllers/bladePitchControllers/PID.H"
-        }
-        
-        //_SSC_: a PID controller where the minimum pitch is chosen by super controller
-        else if (BladePitchControllerType[j] == "PIDSC")
-        {
-            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2]; // in degrees
-            #include "../universalControllers/bladePitchControllers/PID.H"
-        }
-        
-        //_SSC_: directly assign blade pitch angles by super controller
-        else if (BladePitchControllerType[j] == "pitchSC")
-        {
-            #include "../universalControllers/bladePitchControllers/pitchSC.H"
-        }
         
         // Apply pitch rate limiter.
         if (BladePitchRateLimiter[j])
         {
-            #include "../universalLimiters/bladePitchRateLimiter.H"
+            // Apply for each blade individually
+            for(int ibl = 0; ibl < numberOfBlades; ibl++)
+            {
+                scalar bladePitchCommanded = individualBladePitchCommanded[ibl];
+                scalar currentBladePitch = bladePitch[i][ibl]; 
+                #include "../universalLimiters/bladePitchRateLimiter.H"   // Apply limiter
+                individualBladePitchCommanded[ibl] = bladePitchCommanded; // Overwrite setpoint
+            }            
         }
 
-        // Update the pitch array.
-        bladePitch[i] = bladePitchCommanded;
+        // Update the pitch angle for turbine [i] for each blade
+        for(int ibl = 0; ibl < numberOfBlades; ibl++)
+        {
+            bladePitch[i][ibl] = individualBladePitchCommanded[ibl];
+        }
     }
 }
 
@@ -2485,8 +2530,8 @@ void horizontalAxisWindTurbinesALMAdvanced::computeBladePointForce()
                 scalar windAng = Foam::atan2(bladeWindVectors[i][j][k].x(),bladeWindVectors[i][j][k].y())/degRad; 
 
                 // Angle of attack is local angle of wind with respect to rotor plane tangent minus local twist.
-                bladePointAlpha[i][j][k] = windAng - bladePointTwist[i][j][k] - bladePitch[i];
-
+                //bladePointAlpha[i][j][k] = windAng - bladePointTwist[i][j][k] - bladePitch[i];
+                bladePointAlpha[i][j][k] = windAng - bladePointTwist[i][j][k] - bladePitch[i][j]; // IPC implementation
                 //Info << j << tab << k << tab << bladePointAlpha[i][j][k] << endl;
 
                 // Use airfoil look-up tables to get coefficient of bladePointLift and drag.
@@ -2810,8 +2855,10 @@ scalar horizontalAxisWindTurbinesALMAdvanced::computeBladeProjectionFunction(vec
         vector dir0 = bladeAlignedVectors[i][j][1];
         vector dir1 = bladeAlignedVectors[i][j][0];
         vector dir2 = bladeAlignedVectors[i][j][2];
-        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
-        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        //dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        //dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j])*degRad); // IPC implementation
+        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j])*degRad); // IPC implementation
         spreading = generalizedGaussian3D(bladeEpsilon[i], disVector, dir0, dir1, dir2);
     }
     else if (bladeForceProjectionType[i] == "chordThicknessGaussian")
@@ -2826,8 +2873,10 @@ scalar horizontalAxisWindTurbinesALMAdvanced::computeBladeProjectionFunction(vec
         vector dir0 = bladeAlignedVectors[i][j][1];
         vector dir1 = bladeAlignedVectors[i][j][0];
         vector dir2 = bladeAlignedVectors[i][j][2];
-        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
-        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        //dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        //dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j])*degRad); // IPC implementation
+        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j])*degRad); // IPC implementation
       //dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i] + bladePointAlpha[i][j][k])*degRad);
       //dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i] + bladePointAlpha[i][j][k])*degRad);
         spreading = generalizedGaussian3D(epsilon, disVector, dir0, dir1, dir2);
@@ -2837,8 +2886,10 @@ scalar horizontalAxisWindTurbinesALMAdvanced::computeBladeProjectionFunction(vec
         vector dir0 = bladeAlignedVectors[i][j][1];
         vector dir1 = bladeAlignedVectors[i][j][0];
         vector dir2 = bladeAlignedVectors[i][j][2];
-        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
-        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        //dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        //dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
+        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j])*degRad); // IPC implementation
+        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j])*degRad); // IPC implementation
         spreading = generalizedGaussian2D(bladeEpsilon[i], disVector, dir0, dir1);
     }
     else if (bladeForceProjectionType[i] == "chordThicknessGaussian2D")
@@ -2853,8 +2904,10 @@ scalar horizontalAxisWindTurbinesALMAdvanced::computeBladeProjectionFunction(vec
         vector dir2 = bladeAlignedVectors[i][j][2];
       //dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
       //dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i])*degRad);
-        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i] + bladePointAlpha[i][j][k])*degRad);
-        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i] + bladePointAlpha[i][j][k])*degRad);
+      //dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i] + bladePointAlpha[i][j][k])*degRad);
+      //dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i] + bladePointAlpha[i][j][k])*degRad);
+        dir0 = rotateVector(dir0, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j] + bladePointAlpha[i][j][k])*degRad); // IPC implementation
+        dir1 = rotateVector(dir1, vector::zero, dir2, -(bladePointTwist[i][j][k] + bladePitch[i][j] + bladePointAlpha[i][j][k])*degRad); // IPC implementation
         spreading = generalizedGaussian2D(epsilon, disVector, dir0, dir1);
     }
     else

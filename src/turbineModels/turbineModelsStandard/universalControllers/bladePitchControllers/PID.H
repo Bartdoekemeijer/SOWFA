@@ -2,7 +2,7 @@
             if (pastFirstTimeStep)
             {
                 // Set the gain scheduling variable.
-                GK = 1.0 / (1.0 + (currentBladePitch*degRad)/PitchK[j]);
+                GK = 1.0 / (1.0 + (collectiveBladePitchCurrent*degRad)/PitchK[j]);
 
                 // Store the old value of speed error.
                 scalar speedErrorLast = speedError[i];
@@ -24,10 +24,10 @@
                 scalar pitchP = GK * PitchControlKP[j] * speedError[i];
                 scalar pitchI = GK * PitchControlKI[j] * intSpeedError[i];
                 scalar pitchD = GK * PitchControlKD[j] * derivSpeedError;
-                bladePitchCommanded = (pitchP + pitchI + pitchD) / degRad;
+                collectiveBladePitchCommanded = (pitchP + pitchI + pitchD) / degRad;
 
                 // Saturate the pitch based on the pitch limits of the pitch actuator.
-                bladePitchCommanded = min(max(bladePitchCommanded, minBladePitch), PitchMax[j]);
+                collectiveBladePitchCommanded = min(max(collectiveBladePitchCommanded, minBladePitch), PitchMax[j]);
             }
             // If first call to controller, initialize some values.
             else
@@ -35,7 +35,7 @@
                 // set integrated speed error such that if there is no speed error
                 // on the first real control step (see the else section below), there
                 // will not be a change in pitch.
-                GK = 1.0 / (1.0 + (currentBladePitch*degRad)/PitchK[j]);
-                intSpeedError[i] = (currentBladePitch*degRad) / (GK * PitchControlKI[j]);
+                GK = 1.0 / (1.0 + (collectiveBladePitchCurrent*degRad)/PitchK[j]);
+                intSpeedError[i] = (collectiveBladePitchCurrent*degRad) / (GK * PitchControlKI[j]);
             }
 
