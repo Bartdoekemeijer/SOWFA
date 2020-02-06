@@ -1,5 +1,5 @@
             // Limit the change in generator torque.
             //
-            scalar torqueGenRateCommanded = (torqueGenCommanded - torqueGen[i]) / dt;
+            scalar torqueGenRateCommanded = (generatorTorqueCommanded - currentGenTorque) / dt;
             torqueGenRateCommanded = min(max(torqueGenRateCommanded, -RateLimitGenTorque[j]), RateLimitGenTorque[j]);
-            torqueGenCommanded = torqueGen[i] + (torqueGenRateCommanded * dt);
+            generatorTorqueCommanded = currentGenTorque + (torqueGenRateCommanded * dt);

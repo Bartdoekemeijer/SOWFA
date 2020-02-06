@@ -1,10 +1,10 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=8
+#PBS -l nodes=1:ppn=40
 #PBS -N "piso.10MW.ALMAdvanced.refinements"
 
 # User input
 startTime=0                 # Start time
-cores=8                     # Enter the number of cores you will preprocess on.
+cores=40                    # Enter the number of cores you will preprocess on.
 runNumber=1                 # Enter the run number (useful for keeping track of restarts).
 solver=pisoFoamTurbine.ALMAdvanced  # Enter the name of the flow solver.
 
@@ -17,6 +17,12 @@ echo "using " $cores " cores"
 # Load the OpenFOAM module on the cluster
 echo "Loading the OpenFOAM module..."
 module load openfoam/2.4.0
+
+# define the ZeroMQ paths
+export ZEROMQ_INCLUDE=$HOME/OpenFOAM/zeroMQ/libzmq/install/include
+export ZEROMQ_LIB=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64
+export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64:$LD_LIBRARY_PATH
 
 # Get the control dictionary for this particular run.
 cp system/controlDict.$runNumber system/controlDict

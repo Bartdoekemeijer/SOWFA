@@ -378,11 +378,6 @@ horizontalAxisWindTurbinesADM::horizontalAxisWindTurbinesADM
         {
             // Read nothing.
         }
-        else if (NacYawControllerType[i] == "timeYawTable")
-        {
-        }
-
-
 
 
         AirfoilType.append(turbineProperties.lookup("Airfoils"));
@@ -530,8 +525,8 @@ horizontalAxisWindTurbinesADM::horizontalAxisWindTurbinesADM
     SpeedFilterCornerFrequency = rpsRadSec * SpeedFilterCornerFrequency;
     RatedRotSpeed = rpmRadSec * RatedRotSpeed;
     PitchK = degRad * PitchK;
-    PitchMin = degRad * PitchMin;
-    PitchMax = degRad * PitchMax;
+    //PitchMin = degRad * PitchMin;
+    //PitchMax = degRad * PitchMax;
     forAll(PreCone,i)
     {
         PreCone[i] = degRad * PreCone[i];
@@ -938,7 +933,9 @@ void horizontalAxisWindTurbinesADM::computeRotSpeed()
         // faster than rated.
         if (RotSpeedLimiter[j])
         {
-            # include "limiters/rotSpeedLimiter.H"
+            // Limit the rotor speed to be positive and such that the generator does not turn
+            // faster than rated.
+            rotSpeed[i] = min(max(0.0,rotSpeed[i]),RatedRotSpeed[j]);
         }
  
         // Compute the change in blade azimuth angle based on the time step and current rotor speed.
@@ -973,44 +970,43 @@ void horizontalAxisWindTurbinesADM::controlGenTorque()
         // Get the turbine type index.
         int j = turbineTypeID[i];
 
+        // Get initial generator torque value
+        scalar currentGenTorque = torqueGen[i];
+        
         // Get the current filtered generator speed.
         scalar genSpeedF = (rotSpeedF[i]/rpmRadSec)*GBRatio[j];
 
-
         // Initialize the commanded generator torque variable;
-        scalar torqueGenCommanded = torqueGen[i];
-
-
+        scalar generatorTorqueCommanded = currentGenTorque;
 
         // Apply a controller to update the rotor speed.
         if (GenTorqueControllerType[j] == "none")
         {
-            #include "controllers/genTorqueControllers/none.H"
+            #include "../universalControllers/genTorqueControllers/none.H"
         }
     
         else if (GenTorqueControllerType[j] == "fiveRegion")
         {
-            #include "controllers/genTorqueControllers/fiveRegion.H"
+            #include "../universalControllers/genTorqueControllers/fiveRegion.H"
         }
 
         else if (GenTorqueControllerType[j] == "speedTorqueTable")
         {
-            #include "controllers/genTorqueControllers/speedTorqueTable.H"
+            #include "../universalControllers/genTorqueControllers/speedTorqueTable.H"
         }
         else if (GenTorqueControllerType[j] == "torqueSC")
         {
-            #include "controllers/genTorqueControllers/torqueSC.H"
+            #include "../universalControllers/genTorqueControllers/torqueSC.H"
         }
       
-
         // Limit the change in generator torque.
         if (GenTorqueRateLimiter[j])
         {
-            #include "limiters/genTorqueRateLimiter.H"
+            #include "../universalLimiters/genTorqueRateLimiter.H"
         }
 
         // Update the pitch array.
-        torqueGen[i] = torqueGenCommanded;
+        torqueGen[i] = generatorTorqueCommanded;
     }
 }
         
@@ -1023,37 +1019,48 @@ void horizontalAxisWindTurbinesADM::controlNacYaw()
         // Get the turbine type index.
         int j = turbineTypeID[i];
 
+        // Initialize the commanded nacelle yaw variable;
+        scalar nacYawCommanded = nacYaw[i];
+        
         // Apply a controller to update the nacelle yaw position.
         if (NacYawControllerType[j] == "none")
         {
             // Do nothing.
-            deltaNacYaw[i] = 0.0;
         }
 
-        else if (NacYawControllerType[j] == "simple")
-        {
-            // Placeholder for when this is implemented.
-        }
-        
-        else if (NacYawControllerType[j] == "timeYawTable")
-        {
-        }
-
-        // _SSC_, set a case for yawSC
-        // simple function assumes the first entry per turbine in 
-        // superInfoFromSSC is a yaw reference to seek
+        // SSC: Yaw controller following SSC setpoints
         else if (NacYawControllerType[j] == "yawSC")
         {
-            #include "controllers/yawControllers/yawSC.H"
+            #include "../universalControllers/nacYawControllers/yawSC.H"
         }
-
-
         
-        // Limit the change in nacelle yaw angle.
+        deltaNacYaw[i] = nacYawCommanded - nacYaw[i]; // Standard calculation of delta yaw
+        
+        // Ensure deltaNacYaw lies within [-360, 360] deg 
+        if ((deltaNacYaw[i] / degRad) <= - 360.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] + (360.0*degRad);
+        }
+        else if ((deltaNacYaw[i] / degRad) >= 360.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] - (360.0*degRad);
+        }        
+        
+        // Now find the shortest distance to the setpoint
+        if ((deltaNacYaw[i] / degRad) <= - 180.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] + (360.0*degRad);
+        }
+        else if ((deltaNacYaw[i] / degRad) >= 180.0)
+        {
+            deltaNacYaw[i] = deltaNacYaw[i] - (360.0*degRad);
+        }
+    
+         // Limit the change in nacelle yaw angle.
         if (NacYawRateLimiter[j])
         {
+            #include "../universalLimiters/nacYawRateLimiter.H"
         }
-
     }
 }
         
@@ -1157,38 +1164,49 @@ void horizontalAxisWindTurbinesADM::controlBladePitch()
         // Get the turbine type index.
         int j = turbineTypeID[i];
         
+        // Initialize relevant variables to use universal controller functions
+        scalar currentBladePitch = pitch[i]; // In degrees
+        scalar currentRotorSpeedF = rotSpeedF[i];
+        
         // Initialize the gain scheduling variable.
         scalar GK = 0.0;
-
+        
         // Initialize the commanded pitch variable.
-        scalar pitchCommanded = pitch[i]*degRad;
-
+        scalar bladePitchCommanded = currentBladePitch; // In degrees
 
         // Apply a controller to update the blade pitch position.
         if (BladePitchControllerType[j] == "none")
         {
-            #include "controllers/bladePitchControllers/none.H"
+            #include "../universalControllers/bladePitchControllers/none.H"
         }
 
         else if (BladePitchControllerType[j] == "PID")
         {
-            #include "controllers/bladePitchControllers/PID.H"
+            scalar minBladePitch = PitchMin[j]; // in degrees
+            #include "../universalControllers/bladePitchControllers/PID.H"
         }
         
-        //_SSC_: allow a pidSC controller where the minimum pitch is chosen by super controller
+        //_SSC_: a PID controller where the minimum pitch is chosen by super controller
         else if (BladePitchControllerType[j] == "PIDSC")
         {
-            #include "controllers/bladePitchControllers/PIDSC.H"
+            scalar minBladePitch = superInfoFromSSC[i*nOutputsFromSSC+2]; // in degrees
+            #include "../universalControllers/bladePitchControllers/PID.H"
         }
-
+        
+        //_SSC_: directly assign blade pitch angles by super controller
+        else if (BladePitchControllerType[j] == "pitchSC")
+        {
+            #include "../universalControllers/bladePitchControllers/pitchSC.H"
+        }
+        
         // Apply pitch rate limiter.
         if (BladePitchRateLimiter[j])
         {
-            #include "limiters/bladePitchRateLimiter.H"
+            #include "../universalLimiters/bladePitchRateLimiter.H"
         }
-
+        
         // Update the pitch array.
-        pitch[i] = pitchCommanded/degRad;
+        pitch[i] = bladePitchCommanded;
     }
 }
 

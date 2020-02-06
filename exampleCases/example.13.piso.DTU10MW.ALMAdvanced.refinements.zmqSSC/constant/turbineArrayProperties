@@ -26,8 +26,8 @@ globalProperties
 sscProperties
 {
     sscEnabled          true; //Enable or disable SSC. If sscProperties{} not present, defaults to 'false'
-    nInputsToSSC        3; // Number of inputs EACH turbine passes to the super controller
-    nOutputsFromSSC     2; // Number of outputs the super controller sends to EACH turbine
+    nInputsToSSC        8; // Measurements: [genPower,rotSpeedF,azimuth,rotThrust,rotTorque,genTorque,nacYaw,bladePitch]
+    nOutputsFromSSC     3; // Control variables: [genTorque, nacYaw, bladePitch]
     sscControllerType   "zeromqSSC"; // The type of SSC
     sscMeasurementsFunction "default"; // Measurements function
     zmqAddress          "tcp://localhost:1711"; // zeroMQ connection port    
