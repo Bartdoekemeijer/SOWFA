@@ -35,10 +35,7 @@ GenIner                   534.116;
 HubIner                   115.926E3;
 BladeIner                  11.776047E6;
 GenTorqueControllerType    "fiveRegion";
-//GenTorqueControllerType  "speedTorqueTable";
-//GenTorqueControllerType  "none";
 BladePitchControllerType   "PIDSC";
-//BladePitchControllerType "none";
 NacYawControllerType       "yawSC";
 RotSpeedLimiter             false;
 GenTorqueRateLimiter        true;
@@ -46,6 +43,21 @@ NacYawRateLimiter           true;
 BladePitchRateLimiter       true;
 SpeedFilterCornerFrequency  2.0;
 
+/*
+   WIND TURBINE CONTROLLER OPTIONS:
+     GenTorqueControllerType    "none"; // Keep torque fixed, no control (ignore SC)
+     GenTorqueControllerType    "speedTorqueTable"; // Default torque control (ignore SC)
+     GenTorqueControllerType    "fiveRegion"; // Default torque control (ignore SC)
+     GenTorqueControllerType    "torqueSC"; // SC directly assigns torque
+     
+     BladePitchControllerType   "none"; // Keep pitch fixed, no control (ignore SC)
+     BladePitchControllerType   "PID"; // Traditional gain-scheduled PID controller, pitching for region III (ignore SC)
+     BladePitchControllerType   "PIDSC"; // PID controller where the SC assigns the minimum pitch angle
+     BladePitchControllerType   "pitchSC"; // SC directly assigns pitch angles
+     
+     NacYawControllerType       "none"; // Keep yaw fixed, no control (ignore SC)
+     NacYawControllerType       "yawSC"; // SC directly assigns yaw angles
+*/
 
 GenTorqueControllerParams
 {
