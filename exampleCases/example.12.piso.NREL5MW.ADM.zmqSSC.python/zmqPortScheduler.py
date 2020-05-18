@@ -11,11 +11,12 @@ logger.setLevel(logging.INFO)
 
 
 # Function to discover all nodes on the 3me cluster
-def importNodelist():
+def import_nodelist():
     nodelist = []
 
     cmd = ["/opt/ud/torque-4.2.10/bin/pbsnodes"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
     node_regex = r"n06-\d{1,3}"
     for line in proc.stdout.readlines():
         line = line.decode()
@@ -23,7 +24,7 @@ def importNodelist():
         if match is not None:
             nodelist.append(match.group())
 
-    if len(nodelist) >= 1:
+    if nodelist:
         logger.info("Nodes found through pbsnodes.")
     else:
         nodelist = ['n06-153', 'n06-152', 'n06-151', 'n06-150', 'n06-142', 'n06-141', 'n06-140', 'n06-139', 'n06-138',
@@ -49,35 +50,35 @@ def importNodelist():
 
 
 # Check if a port is already taken on any of the nodes
-def checkPortAvailability(nodelist, port):
-    portAvailable = True  # Initial condition
+def check_port_availability(nodelist, port):
+    port_available = True  # Initial condition
     for node in nodelist:
         cmd = ['/bin/nc', '-zvw10', node, str(port)]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout.readlines():
             line = line.decode()
             if "Connected to" in line:  # Positive connection
-                portAvailable = False
+                port_available = False
                 logger.info('    ' + line.replace('\n', ''))
-        if portAvailable:
+        if port_available:
             logger.debug("  Node " + node + " has no port conflict.")
         else:
             logger.debug("  Node " + node + " has a port conflict.")
             break
-    return portAvailable
+    return port_available
 
 
 # Find a free port on the cluster
-def findPort(startIdx=1600, endIndx=1999):
-    portArray = np.arange(startIdx, endIndx)
-    random.shuffle(portArray)  # Shuffle order to increase chances of uniqueness
-    nodelist = importNodelist()  # Import nodelist
+def find_port(start_idx=1600, end_idx=1999):
+    port_array = np.arange(start_idx, end_idx)
+    random.shuffle(port_array)  # Shuffle order to increase chances of uniqueness
+    nodelist = import_nodelist()  # Import nodelist
 
-    for port in portArray:
+    for port in port_array:
         logger.debug("Testing port " + str(port) + ".")
-        portAvailability = checkPortAvailability(nodelist, port)
+        port_availability = check_port_availability(nodelist, port)
 
-        if portAvailability:
+        if port_availability:
             logger.info("Found an available port: " + str(port) + ".")
             return port
         else:
@@ -88,24 +89,24 @@ def findPort(startIdx=1600, endIndx=1999):
 
 
 # Update simulation files with the new port
-def updatePortInFiles(newPort):
+def update_port_in_files(new_port):
     # Replace port entry in constant/turbineArrayProperties
-    address_regex = "tcp://localhost:\d{4}"
-    with open("constant/turbineArrayProperties","r") as g:
+    address_regex = r"tcp://localhost:\d{4}"
+    with open("constant/turbineArrayProperties", "r") as g:
         old_text_tap = g.read()
 
     old_address = re.search(address_regex, old_text_tap).group()
     old_port = int(old_address[-4:])
-    new_address = "tcp://localhost:{:4d}".format(newPort)
+    new_address = "tcp://localhost:{:4d}".format(new_port)
     new_text_tap = old_text_tap.replace(old_address, new_address)
 
     with open("constant/turbineArrayProperties", "w") as g:
         g.write(new_text_tap)
 
-    logging.info("Replaced port {:4d} in constant/turbineArrayProperties with port {:4d}.".format(old_port, newPort))
+    logging.info("Replaced port {:4d} in constant/turbineArrayProperties with port {:4d}.".format(old_port, new_port))
 
 
 if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
-    port = findPort()
-    updatePortInFiles(port)
+    port = find_port()
+    update_port_in_files(port)
