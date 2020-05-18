@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import numpy as np
 import subprocess
-import random    
-
+import random
+import re
 
 # Function to discover all nodes on the 3me cluster
 def importNodelist(verbose=False):
@@ -10,12 +10,12 @@ def importNodelist(verbose=False):
 
     cmd = ["/opt/ud/torque-4.2.10/bin/pbsnodes"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    node_regex = r"n06-\d{1,3}"
     for line in proc.stdout.readlines():
         line = line.decode()
-        idxStart = line.find("n06-")
-        idxEnd = line.find(" ", idxStart)
-        if idxEnd > 0:
-            nodelist.append(line[idxStart:idxEnd])
+        match = re.search(node_regex, line)
+        if match is not None:
+            nodelist.append(match.group())
 
     if len(nodelist) >= 1 & verbose:
         print("Nodes found through pbsnodes.")
