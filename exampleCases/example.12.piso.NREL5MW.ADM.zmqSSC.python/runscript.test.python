@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=1
+#PBS -N "piso.zmq.python.test"
+
+which python
+# python -V
+# python3 -V
+# python3 -c "import zmq"
+
+# path to Python 3.6
+export PATH=$HOME/anaconda3/bin:$PATH
+python -V
+python -c "import zmq"
+
+cd ssc
+python ssc.py &
+python testclient.py &
