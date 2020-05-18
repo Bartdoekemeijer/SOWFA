@@ -79,19 +79,19 @@ def findPort(startIdx=1600,endIndx=1999,verbose=False):
 def updatePortInFiles(newPort):
     import numpy as np
     
-    # Replace port entry in SSC.m
-    with open("ssc/SSC.m") as f:
+    # Replace port entry in ssc.py
+    with open("ssc/ssc.py") as f:
         oldTextSSC=f.read()
-        idxZeromqObjLine = oldTextSSC.find('zeromqObj(')
-        startIdxPort = oldTextSSC.find(',',idxZeromqObjLine)+1
+        idxZeromqObjLine = oldTextSSC.find('ZmqServer(')
+        startIdxPort = oldTextSSC.find('port=',idxZeromqObjLine)+5
         endIdxPort = oldTextSSC.find(',',startIdxPort)
         oldPort = oldTextSSC[startIdxPort:endIdxPort]
         newTextSSC = oldTextSSC[0:startIdxPort] + str(newPort) + oldTextSSC[endIdxPort::] # Create new text
         
-    with open("ssc/SSC.m", "w") as f:
+    with open("ssc/ssc.py", "w") as f:
         f.write(newTextSSC)
     
-    print "Replaced port " + oldPort + " in SSC.m with port " + str(newPort) + "."
+    print "Replaced port " + oldPort + " in ssc.py with port " + str(newPort) + "."
     
     
     # Replace port entry in constant/turbineArrayProperties
