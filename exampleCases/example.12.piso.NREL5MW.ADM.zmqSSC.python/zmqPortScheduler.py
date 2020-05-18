@@ -7,10 +7,11 @@ import logging
 import sys
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler(sys.stdout))
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
+
 
 # Function to discover all nodes on the 3me cluster
-def importNodelist(verbose=False):
+def importNodelist():
     nodelist = []
 
     cmd = ["/opt/ud/torque-4.2.10/bin/pbsnodes"]
@@ -22,10 +23,9 @@ def importNodelist(verbose=False):
         if match is not None:
             nodelist.append(match.group())
 
-    if len(nodelist) >= 1 & verbose:
+    if len(nodelist) >= 1:
         logger.info("Nodes found through pbsnodes.")
-
-    if len(nodelist) < 1:
+    else:
         nodelist = ['n06-153', 'n06-152', 'n06-151', 'n06-150', 'n06-142', 'n06-141', 'n06-140', 'n06-139', 'n06-138',
                     'n06-137', 'n06-136', 'n06-135', 'n06-134', 'n06-133', 'n06-132', 'n06-131', 'n06-129', 'n06-128',
                     'n06-127', 'n06-126', 'n06-125', 'n06-124', 'n06-123', 'n06-122', 'n06-121', 'n06-120', 'n06-119',
@@ -39,20 +39,17 @@ def importNodelist(verbose=False):
                     'n06-24', 'n06-23', 'n06-22', 'n06-20', 'n06-19', 'n06-18', 'n06-17', 'n06-16', 'n06-15', 'n06-14',
                     'n06-13', 'n06-12', 'n06-11', 'n06-10', 'n06-09', 'n06-08', 'n06-07', 'n06-06', 'n06-05', 'n06-04',
                     'n06-03', 'n06-02', 'n06-01', 'n06-149', 'n06-21', 'n06-26', 'n06-27']
-        if verbose:
-            logger.info("Cannot connect to PBS server. Nodes found through database.")
+        logger.info("Cannot connect to PBS server. Nodes found through database.")
 
-    if verbose:
-        logger.info('Nodelist:')
-        logger.info(nodelist)
-        logger.info('')
+    logger.debug('Nodelist:')
+    logger.debug(nodelist)
+    logger.debug('')
 
     return nodelist
 
 
 # Check if a port is already taken on any of the nodes
-def checkPortAvailability(nodelist, port, verbose=False):
-    import subprocess
+def checkPortAvailability(nodelist, port):
     portAvailable = True  # Initial condition
     for node in nodelist:
         cmd = ['/bin/nc', '-zvw10', node, str(port)]
@@ -61,29 +58,24 @@ def checkPortAvailability(nodelist, port, verbose=False):
             line = line.decode()
             if "Connected to" in line:  # Positive connection
                 portAvailable = False
-            if verbose:
                 logger.info('    ' + line.replace('\n', ''))
         if portAvailable:
-            if verbose:
-                logger.info("  Node " + node + " has no port conflict.")
+            logger.debug("  Node " + node + " has no port conflict.")
         else:
-            if verbose:
-                logger.info("  Node " + node + " has a port conflict.")
+            logger.debug("  Node " + node + " has a port conflict.")
             break
     return portAvailable
 
 
 # Find a free port on the cluster
-def findPort(startIdx=1600, endIndx=1999, verbose=False):
+def findPort(startIdx=1600, endIndx=1999):
     portArray = np.arange(startIdx, endIndx)
     random.shuffle(portArray)  # Shuffle order to increase chances of uniqueness
-    nodelist = importNodelist(verbose)  # Import nodelist
+    nodelist = importNodelist()  # Import nodelist
 
-    portAvailability = False
     for port in portArray:
-        if verbose:
-            logger.info("Testing port " + str(port) + ".")
-        portAvailability = checkPortAvailability(nodelist, port, verbose)
+        logger.debug("Testing port " + str(port) + ".")
+        portAvailability = checkPortAvailability(nodelist, port)
 
         if portAvailability:
             logger.info("Found an available port: " + str(port) + ".")
@@ -114,6 +106,6 @@ def updatePortInFiles(newPort):
 
 
 if __name__ == '__main__':
-    # Demo with verbose on
-    port = findPort(verbose=True)
+    logger.setLevel(logging.DEBUG)
+    port = findPort()
     updatePortInFiles(port)
