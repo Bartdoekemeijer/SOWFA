@@ -22,6 +22,7 @@ yaw_angle_output = 270. * np.ones(num_turbines)
 pitch_angle_output = np.zeros(num_turbines)
 
 logger.info("Entering wind farm control loop:")
+# todo: Find a suitable end condition that replaces server receive timeout
 while True:
     # Receive simulation time and measurements from SOWFA
     current_time, measurement_array = zmq_server.receive()
