@@ -93,17 +93,19 @@ def findPort(startIdx=1600, endIndx=1999, verbose=False):
 # Update simulation files with the new port
 def updatePortInFiles(newPort):
     # Replace port entry in constant/turbineArrayProperties
-    with open("constant/turbineArrayProperties") as g:
-        oldTextTAP = g.read()
-        startIdxPort = oldTextTAP.find('tcp://localhost:') + 16
-        endIdxPort = oldTextTAP.find('"', startIdxPort)
-        oldPort = oldTextTAP[startIdxPort:endIdxPort]
-        newTextTAP = oldTextTAP[0:startIdxPort] + str(newPort) + oldTextTAP[endIdxPort::]  # Create new text
+    address_regex = "tcp://localhost:\d{4}"
+    with open("constant/turbineArrayProperties","r") as g:
+        old_text_tap = g.read()
+
+    old_address = re.search(address_regex, old_text_tap).group()
+    old_port = int(old_address[-4:])
+    new_address = "tcp://localhost:{:4d}".format(newPort)
+    new_text_tap = old_text_tap.replace(old_address, new_address)
 
     with open("constant/turbineArrayProperties", "w") as g:
-        g.write(newTextTAP)
+        g.write(new_text_tap)
 
-    print("Replaced port " + oldPort + " in constant/turbineArrayProperties with port " + str(newPort) + ".")
+    print("Replaced port {:4d} in constant/turbineArrayProperties with port {:4d}.".format(old_port, newPort))
 
 
 if __name__ == '__main__':
