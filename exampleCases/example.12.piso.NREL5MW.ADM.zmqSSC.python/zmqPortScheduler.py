@@ -61,9 +61,9 @@ def check_port_availability(nodelist, port):
                 port_available = False
                 logger.info('    ' + line.replace('\n', ''))
         if port_available:
-            logger.debug("  Node " + node + " has no port conflict.")
+            logger.debug("  Node {:s} has no port conflict.".format(node))
         else:
-            logger.debug("  Node " + node + " has a port conflict.")
+            logger.debug("  Node {:s} has a port conflict.".format(node))
             break
     return port_available
 
@@ -75,14 +75,14 @@ def find_port(start_idx=1600, end_idx=1999):
     nodelist = import_nodelist()  # Import nodelist
 
     for port in port_array:
-        logger.debug("Testing port " + str(port) + ".")
+        logger.debug("Testing port {:4d}.".format(port))
         port_availability = check_port_availability(nodelist, port)
 
         if port_availability:
-            logger.info("Found an available port: " + str(port) + ".")
+            logger.info("Found an available port: {:4d}.".format(port))
             return port
         else:
-            logger.info("Port " + str(port) + " is already taken.\n")
+            logger.info("Port {:4d} is already taken.".format(port))
 
     logger.info("Did not find an available port.")
     return -1
