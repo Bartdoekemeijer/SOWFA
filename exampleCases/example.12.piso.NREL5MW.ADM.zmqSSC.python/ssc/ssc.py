@@ -1,5 +1,6 @@
 import numpy as np
 from zmqserver import ZmqServer
+import re
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -10,8 +11,13 @@ logger = logging.getLogger('controller')
 
 logger.info("Initialising ZMQ server")
 # Set up the ZMQ server for communication with SOWFA
-# Make sure port is unique and set same in constant/turbineArrayProperties
-zmq_server = ZmqServer(port=1876, timeout=3600)
+# Port is taken from definition in constant/turbineArrayProperties
+with open('../constant/turbineArrayProperties') as f:
+    address_regex = r"tcp://localhost:\d{4}"
+    client_addres = re.search(address_regex,f.read()).group()
+    port = int(client_addres[-4:])
+    
+zmq_server = ZmqServer(port=port, timeout=3600)
 logger.info("ZMQ server initialised")
 
 # Specify number of turbines
