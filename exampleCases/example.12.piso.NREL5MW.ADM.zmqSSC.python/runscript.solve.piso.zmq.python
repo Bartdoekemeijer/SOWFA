@@ -31,7 +31,7 @@ export LD_LIBRARY_PATH=$HOME/OpenFOAM/zeroMQ/libzmq/install/lib64:$LD_LIBRARY_PA
 cp system/controlDict.$runNumber system/controlDict
 
 # Find an available ZeroMQ port and save it to ssc/ssc.py and constant/turbineArrayProperties
-python2 zmqPortScheduler.py > log.$runNumber.zmqPortScheduler 2>&1
+python zmqPortScheduler.py > log.$runNumber.zmqPortScheduler 2>&1
 
 # Run the solver and the MATLAB controller in parallel
 (mpirun -np $cores $solver -parallel > log.$runNumber.$solver 2>&1) &
