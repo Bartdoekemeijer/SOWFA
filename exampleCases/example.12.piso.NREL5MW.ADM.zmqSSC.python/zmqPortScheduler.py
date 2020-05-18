@@ -3,6 +3,11 @@ import numpy as np
 import subprocess
 import random
 import re
+import logging
+import sys
+logger = logging.getLogger()
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.setLevel(logging.DEBUG)
 
 # Function to discover all nodes on the 3me cluster
 def importNodelist(verbose=False):
@@ -18,7 +23,7 @@ def importNodelist(verbose=False):
             nodelist.append(match.group())
 
     if len(nodelist) >= 1 & verbose:
-        print("Nodes found through pbsnodes.")
+        logger.info("Nodes found through pbsnodes.")
 
     if len(nodelist) < 1:
         nodelist = ['n06-153', 'n06-152', 'n06-151', 'n06-150', 'n06-142', 'n06-141', 'n06-140', 'n06-139', 'n06-138',
@@ -35,12 +40,12 @@ def importNodelist(verbose=False):
                     'n06-13', 'n06-12', 'n06-11', 'n06-10', 'n06-09', 'n06-08', 'n06-07', 'n06-06', 'n06-05', 'n06-04',
                     'n06-03', 'n06-02', 'n06-01', 'n06-149', 'n06-21', 'n06-26', 'n06-27']
         if verbose:
-            print("Cannot connect to PBS server. Nodes found through database.")
+            logger.info("Cannot connect to PBS server. Nodes found through database.")
 
     if verbose:
-        print('Nodelist:')
-        print(nodelist)
-        print('')
+        logger.info('Nodelist:')
+        logger.info(nodelist)
+        logger.info('')
 
     return nodelist
 
@@ -57,13 +62,13 @@ def checkPortAvailability(nodelist, port, verbose=False):
             if "Connected to" in line:  # Positive connection
                 portAvailable = False
             if verbose:
-                print('    ' + line.replace('\n', ''))
+                logger.info('    ' + line.replace('\n', ''))
         if portAvailable:
             if verbose:
-                print("  Node " + node + " has no port conflict.")
+                logger.info("  Node " + node + " has no port conflict.")
         else:
             if verbose:
-                print("  Node " + node + " has a port conflict.")
+                logger.info("  Node " + node + " has a port conflict.")
             break
     return portAvailable
 
@@ -77,16 +82,16 @@ def findPort(startIdx=1600, endIndx=1999, verbose=False):
     portAvailability = False
     for port in portArray:
         if verbose:
-            print("Testing port " + str(port) + ".")
+            logger.info("Testing port " + str(port) + ".")
         portAvailability = checkPortAvailability(nodelist, port, verbose)
 
         if portAvailability:
-            print("Found an available port: " + str(port) + ".")
+            logger.info("Found an available port: " + str(port) + ".")
             return port
         else:
-            print("Port " + str(port) + " is already taken.\n")
+            logger.info("Port " + str(port) + " is already taken.\n")
 
-    print("Did not find an available port.")
+    logger.info("Did not find an available port.")
     return -1
 
 
@@ -105,7 +110,7 @@ def updatePortInFiles(newPort):
     with open("constant/turbineArrayProperties", "w") as g:
         g.write(new_text_tap)
 
-    print("Replaced port {:4d} in constant/turbineArrayProperties with port {:4d}.".format(old_port, newPort))
+    logging.info("Replaced port {:4d} in constant/turbineArrayProperties with port {:4d}.".format(old_port, newPort))
 
 
 if __name__ == '__main__':
