@@ -36,14 +36,14 @@ while True:
 
     # Measurements depend on SOWFA configuration as specified in:
     # src/turbineModels/turbineModelsStandard/horizontalAxisWindTurbinesADM/controllers/measurementfunctions/default.H
-    generator_power = measurement_array[1::8]
-    rotor_speed = measurement_array[2::8]
-    azimuth_angle = measurement_array[3::8]
-    rotor_thrust = measurement_array[4::8]
-    rotor_torque = measurement_array[5::8]
-    generator_torque = measurement_array[6::8]
-    nacelle_yaw = measurement_array[7::8]
-    blade_pitch = measurement_array[8::8]
+    generator_power = measurement_array[0::8]
+    rotor_speed = measurement_array[1::8]
+    azimuth_angle = measurement_array[2::8]
+    rotor_thrust = measurement_array[3::8]
+    rotor_torque = measurement_array[4::8]
+    generator_torque = measurement_array[5::8]
+    nacelle_yaw = measurement_array[6::8]
+    blade_pitch = measurement_array[7::8]
 
     logger.debug("Current time: {}".format(current_time))
     logger.debug("Generator power: {}".format(generator_power))
