@@ -14,7 +14,7 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:1876")
 
 #  Do 10 requests, waiting each time for a response
-measurements = np.linspace(0, 6, 7)
+measurements = np.linspace(0, 16, 17)
 for request in range(10):
 
     logger.info("Sending measurement series {}".format(request))
