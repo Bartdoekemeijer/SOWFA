@@ -46,6 +46,7 @@ while True:
     blade_pitch = measurement_array[7::8]
 
     logger.debug("Current time: {}".format(current_time))
+    logger.debug("Turbine yaw: {}".format(nacelle_yaw))
     logger.debug("Generator power: {}".format(generator_power))
 
     # do something with measurements
@@ -66,6 +67,7 @@ while True:
         yaw_angle_output[1] = 270.
 
     # Send control signals to SOWFA
+    logger.debug("Sending torque signal: {}".format(torque_output))
     logger.debug("Sending yaw signal: {}".format(yaw_angle_output))
     logger.debug("Sending pitch signal: {}".format(pitch_angle_output))
     zmq_server.send(torque_output, yaw_angle_output, pitch_angle_output)
