@@ -24,8 +24,9 @@ logger.info("ZMQ server initialised")
 num_turbines = 2
 
 # Prepare yaw and pitch control signals
+torque_output = 0. * np.ones(num_turbines)
 yaw_angle_output = 270. * np.ones(num_turbines)
-pitch_angle_output = np.zeros(num_turbines)
+pitch_angle_output = 0. * np.ones(num_turbines)
 
 logger.info("Entering wind farm control loop:")
 # todo: Find a suitable end condition that replaces server receive timeout
@@ -67,4 +68,4 @@ while True:
     # Send control signals to SOWFA
     logger.debug("Sending yaw signal: {}".format(yaw_angle_output))
     logger.debug("Sending pitch signal: {}".format(pitch_angle_output))
-    zmq_server.send(yaw_angle_output, pitch_angle_output)
+    zmq_server.send(torque_output, yaw_angle_output, pitch_angle_output)

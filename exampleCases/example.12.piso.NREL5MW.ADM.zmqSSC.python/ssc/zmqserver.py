@@ -58,9 +58,9 @@ class ZmqServer:
         measurement_array = received_data[1:]
         return current_time, measurement_array
 
-    def send(self, yaw_ref, pitch_ref):
+    def send(self, torque_ref, yaw_ref, pitch_ref):
         # Construct control signal array as expected by SOWFA
-        data_send = np.array([[yaw, pitch] for yaw, pitch in zip(yaw_ref, pitch_ref)]).ravel()
+        data_send = np.array([[torque, yaw, pitch] for torque, yaw, pitch in zip(torque_ref,yaw_ref, pitch_ref)]).ravel()
         string_data = ["{:.6f}".format(d) for d in data_send]
         string_send = " ".join(string_data)
 
